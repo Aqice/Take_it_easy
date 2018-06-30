@@ -50,6 +50,24 @@ class CafeMedia(models.Model):
     )
 
 
+class Item(models.Model):
+    item_id = models.AutoField(
+        primary_key=True
+    )
+    item_name = models.CharField(
+        verbose_name="Название элемента", max_length=1000,
+    )
+    item_description = models.TextField(
+        verbose_name="Описание элемента"
+    )
+    item_icon = models.ImageField(
+        verbose_name="Иконка элемента"
+    )
+    item_image = models.ImageField(
+        verbose_name="Фото элемента"
+    )
+
+
 class OpeningHours(models.Model):
     opening_hours_id = models.AutoField(
         primary_key=True,
@@ -62,7 +80,7 @@ class OpeningHours(models.Model):
     )
 
     def __str__(self):
-        return self.opening_time + " -- " + self.closing_time
+        return str(self.opening_time) + " -- " + str(self.closing_time)
 
 
 class Cafe(models.Model):
