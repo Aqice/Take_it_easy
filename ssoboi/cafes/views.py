@@ -1,7 +1,9 @@
-from django.http import HttpResponse, HttpResponseBadRequest
 from .models import Cafe, Coordinates, Owner, OpeningHours
-from django.views.decorators.csrf import csrf_exempt
 
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+from django.core import serializers
+import json
 
 @csrf_exempt
 def add_cafe(request):
@@ -53,6 +55,7 @@ def add_cafe(request):
         coordinates.save()
     except KeyError:
         return HttpResponseBadRequest("Coordinates are invalid.")
+
     try:
         cafe = Cafe(
             cafe_name=request.POST["cafe_name"],
@@ -67,3 +70,70 @@ def add_cafe(request):
         return HttpResponseBadRequest("Cafe information is invalid.")
 
     return HttpResponse(cafe.cafe_id)
+
+
+@csrf_exempt
+def get_cafe_by_id(request):
+    """
+
+    Функция для получение информации о кафе
+
+    :param request: GET запрос, включающий в себя:
+                        cafe_id - ID кафе, информацию которого нужно получить
+    :return: информация о кафе
+    """
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+    try:
+        cafe = Cafe.objects.get(cafe_id=request.GET["cafe_id"])
+    except:
+        return HttpResponseBadRequest("cafe_id is invalid")
+
+    serialized_obj = serializers.serialize('json', [cafe, ])
+    return HttpResponse(serialized_obj)
+
+
+@csrf_exempt
+def remove_cafe(request):
+    """
+
+        Функция для удаления кафе
+
+        :param request: GET запрос, включающий в себя:
+                            cafe_id - ID кафе, которое нужно удалить
+        :return: 1, если всё прошло штатно
+        """
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    try:
+        cafe = Cafe.objects.get(cafe_id=request.GET["cafe_id"])
+    except:
+        return HttpResponseBadRequest("cafe_id is invalid")
+
+    cafe.delete()
+    return HttpResponse(1)
+
+
+@csrf_exempt
+def get_cafe_by_coord(request):
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    try:
+        lat = int(request.GET["lat"])
+        lon = int(request.GET["lon"])
+        r = int(request.GET["r"])
+    except KeyError:
+        return HttpResponseBadRequest("lat, lon or r parameter is invalid")
+
+    r2 = r**2
+
+    all_cafes = Cafe.objects.all()
+    id_of_cafes_in_circle = []
+
+    for cafe in all_cafes:
+        if (cafe.cafe_coordinates.lat - lat) ** 2 + (cafe.cafe_coordinates.lon - lon) ** 2 <= r2:
+            id_of_cafes_in_circle.append(cafe.cafe_id)
+
+    return HttpResponse(json.dumps(id_of_cafes_in_circle))

@@ -86,7 +86,6 @@ class OpeningHours(models.Model):
         return str(self.opening_time) + " -- " + str(self.closing_time)
 
 
-
 class Cafe(models.Model):
     cafe_id = models.AutoField(
         primary_key=True, verbose_name="ID кафе",
