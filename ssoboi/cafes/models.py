@@ -67,6 +67,9 @@ class Item(models.Model):
         verbose_name="Фото элемента"
     )
 
+    def __str__(self):
+        return str(self.item_name) + ' - ' + str(self.item_description)
+
 
 class OpeningHours(models.Model):
     opening_hours_id = models.AutoField(
@@ -102,6 +105,7 @@ class Cafe(models.Model):
     cafe_owner = models.ForeignKey(
         Owner, on_delete=models.CASCADE, verbose_name="Владелец кафе",
     )
+
     cafe_opening_hours = models.ForeignKey(
         OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
     )
