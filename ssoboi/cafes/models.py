@@ -86,6 +86,7 @@ class OpeningHours(models.Model):
         return str(self.opening_time) + " -- " + str(self.closing_time)
 
 
+
 class Cafe(models.Model):
     cafe_id = models.AutoField(
         primary_key=True, verbose_name="ID кафе",
@@ -105,7 +106,9 @@ class Cafe(models.Model):
     cafe_owner = models.ForeignKey(
         Owner, on_delete=models.CASCADE, verbose_name="Владелец кафе",
     )
-
+    cafe_menu = models.ManyToManyField(
+        Item
+    )
     cafe_opening_hours = models.ForeignKey(
         OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
     )
