@@ -1,4 +1,3 @@
-from datetime import time
 from django.http import HttpResponse, HttpResponseBadRequest
 from .models import Cafe, Coordinates, Owner, OpeningHours
 from django.views.decorators.csrf import csrf_exempt
@@ -16,8 +15,8 @@ def add_cafe(request):
                         cafe_name - название кафе
                         cafe_description - описание кафе
                         cafe_rating - рэйтинг кафе
-                        opening_time - время открытия кафе
-                        closing_time - время закрытия кафе
+                        opening_time - время открытия кафе (формат: HH:MM:SS)
+                        closing_time - время закрытия кафе (формат: HH:MM:SS)
                         lat - Широта кафе
                         lon - Долгота кафе
 
@@ -39,10 +38,8 @@ def add_cafe(request):
 
     try:
         opening_hours = OpeningHours(
-            # opening_time=request.POST["opening_time"],
-            # closing_time=request.POST["closing_time"]
-            opening_time=(time(hour=6, minute=0, second=0, microsecond=0, tzinfo=None)),
-            closing_time=(time(hour=22, minute=0, second=0, microsecond=0, tzinfo=None))
+            opening_time=request.POST["opening_time"],
+            closing_time=request.POST["closing_time"]
         )
         opening_hours.save()
     except KeyError:
