@@ -54,10 +54,10 @@ class OpeningHours(models.Model):
     opening_hours_id = models.AutoField(
         primary_key=True,
     )
-    opening_time = models.DateField(
+    opening_time = models.TimeField(
         verbose_name="Время открытия"
     )
-    closing_time = models.DateField(
+    closing_time = models.TimeField(
         verbose_name="Время закрытия"
     )
 

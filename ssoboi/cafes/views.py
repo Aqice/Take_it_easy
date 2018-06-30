@@ -1,5 +1,5 @@
+from datetime import time
 from django.http import HttpResponse, HttpResponseBadRequest
-
 from .models import Cafe, Coordinates, Owner, OpeningHours
 from django.views.decorators.csrf import csrf_exempt
 
@@ -26,6 +26,7 @@ def add_cafe(request):
     """
     if request.method != "POST":
         return HttpResponseBadRequest("Incorrect type of request. POST needed.")
+
     try:
         owner = Owner(
             owner_name=request.POST["owner_name"],
@@ -38,8 +39,10 @@ def add_cafe(request):
 
     try:
         opening_hours = OpeningHours(
-            opening_time=request.POST["opening_time"],
-            closing_time=request.POST["closing_time"]
+            # opening_time=request.POST["opening_time"],
+            # closing_time=request.POST["closing_time"]
+            opening_time=(time(hour=6, minute=0, second=0, microsecond=0, tzinfo=None)),
+            closing_time=(time(hour=22, minute=0, second=0, microsecond=0, tzinfo=None))
         )
         opening_hours.save()
     except KeyError:
@@ -59,7 +62,7 @@ def add_cafe(request):
             cafe_description=request.POST["cafe_description"],
             cafe_rating=request.POST["cafe_rating"],
             cafe_coordinates=coordinates,
-            cafe_owner=request.POST["cafe_owner"],
+            cafe_owner=owner,
             cafe_opening_hours=opening_hours
         )
         cafe.save()
