@@ -13,5 +13,5 @@ admin.site.register(Owner)
 admin.site.register(Item)
 
 
-class ProfileAdmin(UserAdmin):
-    filter_horizontal = ('opetest',)
+class SomeModelAdmin(admin.ModelAdmin):
+    raw_id_fields = ("cafe_menu",)

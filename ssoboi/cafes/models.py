@@ -106,7 +106,8 @@ class Cafe(models.Model):
         Owner, on_delete=models.CASCADE, verbose_name="Владелец кафе",
     )
     cafe_menu = models.ManyToManyField(
-        Item
+        Item,
+        related_name="cafe_menu"
     )
     cafe_opening_hours = models.ForeignKey(
         OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
