@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now
 
 
 class Coordinates(models.Model):
@@ -113,7 +113,7 @@ class Cafe(models.Model):
     cafe_opening_hours = models.ForeignKey(
         OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
     )
-    add_time = models.DateTimeField(verbose_name='Дата добавления', default=timezone.now())
+    add_time = models.DateTimeField(verbose_name='Дата добавления', default=now())
 
     def __str__(self):
         return self.cafe_name
