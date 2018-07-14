@@ -113,8 +113,7 @@ class Cafe(models.Model):
     cafe_opening_hours = models.ForeignKey(
         OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
     )
-    # time of adding
-    add_time = models.DateTimeField('Дата добавления', default=timezone.now())
+    add_time = models.DateTimeField(verbose_name='Дата добавления', default=timezone.now())
 
     def __str__(self):
         return self.cafe_name

@@ -150,6 +150,14 @@ def get_cafe_by_coord(request):
 
 @csrf_exempt
 def get_coord_by_id(request):
+    """
+
+        Функция для получения координат кафе по cafe_id
+
+        :param request: GET запрос, включающий в себя:
+                            cafe_id - ID кафе, координаты которого нужно получить
+        :return: coordinates если все прошло штатно
+        """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -164,6 +172,14 @@ def get_coord_by_id(request):
 
 
 def get_owner_by_id(request):
+    """
+
+        Функция для получения владельца кафе по cafe_id
+
+        :param request: GET запрос, включающий в себя:
+                            cafe_id - ID кафе, владельца которого нужно получить
+        :return: owner, если все прошло штатно
+        """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -179,6 +195,14 @@ def get_owner_by_id(request):
 
 @csrf_exempt
 def get_cafe_opening_hours_by_id(request):
+    """
+
+        Функция для получения времени работы кафе по cafe_id
+
+        :param request: GET запрос, включающий в себя:
+                            cafe_id - ID кафе, время работы которого нужно получить
+        :return: cafe_opening_hours, если все прошло штатно
+        """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -194,6 +218,14 @@ def get_cafe_opening_hours_by_id(request):
 
 @csrf_exempt
 def get_item_by_id(request):
+    """
+
+        Функция для получения элемента меню кафе по item_id
+
+        :param request: GET запрос, включающий в себя:
+                            item_id - ID элемента, который нужно получить
+        :return: item, если все прошло штатно
+        """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
