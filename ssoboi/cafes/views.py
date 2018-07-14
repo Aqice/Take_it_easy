@@ -1,9 +1,10 @@
-from .models import Cafe, Coordinates, Owner, OpeningHours
+from .models import Cafe, Coordinates, Owner, OpeningHours, Item
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 import json
+
 
 @csrf_exempt
 def add_cafe(request):
@@ -117,6 +118,14 @@ def remove_cafe(request):
 
 @csrf_exempt
 def get_cafe_by_coord(request):
+    """
+
+    :param request: GET запрос, включающий в себя:
+                        lat - широта
+                        lon - долгота
+                        r - радиус
+    :return: список id, если всё прошло штатно
+    """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -127,7 +136,7 @@ def get_cafe_by_coord(request):
     except KeyError:
         return HttpResponseBadRequest("lat, lon or r parameter is invalid")
 
-    r2 = r**2
+    r2 = r ** 2
 
     all_cafes = Cafe.objects.all()
     id_of_cafes_in_circle = []
@@ -137,3 +146,62 @@ def get_cafe_by_coord(request):
             id_of_cafes_in_circle.append(cafe.cafe_id)
 
     return HttpResponse(json.dumps(id_of_cafes_in_circle))
+
+
+@csrf_exempt
+def get_coord_by_id(request):
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    try:
+        coordinates = Coordinates.objects.get(coordinates_id=int(request.GET["id"]))
+    except:
+        return HttpResponseBadRequest("id is invalid")
+
+    serialized_obj = serializers.serialize('json', [coordinates, ])
+
+    return HttpResponse(serialized_obj)
+
+
+def get_owner_by_id(request):
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    try:
+        owner = Owner.objects.get(owner_id=int(request.GET["id"]))
+    except KeyError:
+        return HttpResponseBadRequest("id is invalid")
+
+    serialized_obj = serializers.serialize('json', [owner, ])
+
+    return HttpResponse(serialized_obj)
+
+
+@csrf_exempt
+def get_cafe_opening_hours_by_id(request):
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    try:
+        cafe_opening_hours = OpeningHours.objects.get(opening_hours_id=int(request.GET["id"]))
+    except:
+        return HttpResponseBadRequest("id is invalid")
+
+    serialized_obj = serializers.serialize('json', [cafe_opening_hours, ])
+
+    return HttpResponse(serialized_obj)
+
+
+@csrf_exempt
+def get_item_by_id(request):
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    try:
+        item = Item.objects.get(item_id=int(request.GET["id"]))
+    except:
+        return HttpResponseBadRequest("id is invalid")
+
+    serialized_obj = serializers.serialize('json', [item, ])
+
+    return HttpResponse(serialized_obj)
