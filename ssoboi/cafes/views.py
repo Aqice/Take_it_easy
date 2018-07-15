@@ -9,26 +9,27 @@ import json
 @csrf_exempt
 def add_cafe(request):
     """
-    Функция для добавления нового кафе
 
-    :param request: POST запрос, включающий в себя:
-                        owner_name - ФИО владельца
-                        owner_phone_number - телефон фладельца
-                        owner_email - email владельца
-                        cafe_name - название кафе
-                        cafe_description - описание кафе
-                        cafe_rating - рэйтинг кафе
-                        opening_time - время открытия кафе (формат: HH:MM:SS)
-                        closing_time - время закрытия кафе (формат: HH:MM:SS)
-                        lat - Широта кафе
-                        lon - Долгота кафе
+    Функция для добавления нового кафе. POST запрос
 
+    Параметры:
+    ^^^^^^^^^^
 
-    :return: ID созданного кафе, если все параметры указаны верно
+        - `owner_name`: ФИО владельца
+        - `owner_phone_number`: Телефон владельца
+        - `owner_email`: Email владельца
+        - `cafe_name`: Название кафе
+        - 'cafe_description': Описание кафе
+        - 'cafe_rating': Рэйтинг кафе
+        - `opening_time`: Время открытия кафе (формат: HH:MM:SS)
+        - 'closing_time': Время закрытия кафе (формат: HH:MM:SS)
+        - 'lat': Широта кафе
+        - 'lon': Долгота кафе
+
+    Если создание прошло успешно, то выдает ID созданого кафе
     """
     if request.method != "POST":
         return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-
     try:
         owner = Owner(
             owner_name=request.POST["owner_name"],
