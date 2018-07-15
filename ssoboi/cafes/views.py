@@ -9,26 +9,27 @@ import json
 @csrf_exempt
 def add_cafe(request):
     """
-    Функция для добавления нового кафе
 
-    :param request: POST запрос, включающий в себя:
-                        owner_name - ФИО владельца
-                        owner_phone_number - телефон фладельца
-                        owner_email - email владельца
-                        cafe_name - название кафе
-                        cafe_description - описание кафе
-                        cafe_rating - рэйтинг кафе
-                        opening_time - время открытия кафе (формат: HH:MM:SS)
-                        closing_time - время закрытия кафе (формат: HH:MM:SS)
-                        lat - Широта кафе
-                        lon - Долгота кафе
+    Функция для добавления нового кафе. POST запрос
 
+    Параметры:
+    ^^^^^^^^^^
 
-    :return: ID созданного кафе, если все параметры указаны верно
+        - `owner_name`: ФИО владельца
+        - `owner_phone_number`: Телефон владельца
+        - `owner_email`: Email владельца
+        - `cafe_name`: Название кафе
+        - 'cafe_description': Описание кафе
+        - 'cafe_rating': Рэйтинг кафе
+        - `opening_time`: Время открытия кафе (формат: HH:MM:SS)
+        - 'closing_time': Время закрытия кафе (формат: HH:MM:SS)
+        - 'lat': Широта кафе
+        - 'lon': Долгота кафе
+
+    Если создание прошло успешно, то выдает ID созданого кафе
     """
     if request.method != "POST":
         return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-
     try:
         owner = Owner(
             owner_name=request.POST["owner_name"],
@@ -157,7 +158,7 @@ def get_coord_by_id(request):
         :param request: GET запрос, включающий в себя:
                             cafe_id - ID кафе, координаты которого нужно получить
         :return: coordinates если все прошло штатно
-        """
+    """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -179,7 +180,7 @@ def get_owner_by_id(request):
         :param request: GET запрос, включающий в себя:
                             cafe_id - ID кафе, владельца которого нужно получить
         :return: owner, если все прошло штатно
-        """
+    """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -202,7 +203,7 @@ def get_cafe_opening_hours_by_id(request):
         :param request: GET запрос, включающий в себя:
                             cafe_id - ID кафе, время работы которого нужно получить
         :return: cafe_opening_hours, если все прошло штатно
-        """
+    """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -225,7 +226,7 @@ def get_item_by_id(request):
         :param request: GET запрос, включающий в себя:
                             item_id - ID элемента, который нужно получить
         :return: item, если все прошло штатно
-        """
+    """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
