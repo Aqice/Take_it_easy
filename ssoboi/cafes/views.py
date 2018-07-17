@@ -388,12 +388,12 @@ def create_new_wait_list(request):
 
 
 @csrf_exempt
-def get_all_wait_lists_by_id(request):
+def get_all_wait_lists_by_cafe_id(request):
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
     # Добавить проверки как в функции ```get_item_by_id```
-    wait_list = WaitList.objects.get(order_id=request.GET["wait_list_id"])
+    wait_list = WaitList.objects.get(cafe_id=request.GET["cafe_id"])
     serialized_obj = serializers.serialize('json', [wait_list, ])
 
     return HttpResponse(serialized_obj)
