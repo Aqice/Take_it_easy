@@ -78,6 +78,74 @@ class Item(models.Model):
         return str(self.item_name) + ' - ' + str(self.item_description)
 
 
+class OpeningHours(models.Model):
+    opening_hours_id = models.AutoField(
+        primary_key=True,
+    )
+    opening_time = models.TimeField(
+        verbose_name="Время открытия"
+    )
+    closing_time = models.TimeField(
+        verbose_name="Время закрытия"
+    )
+
+    def __str__(self):
+        return str(self.opening_time) + " -- " + str(self.closing_time)
+
+
+class Cafe(models.Model):
+    cafe_id = models.AutoField(
+        primary_key=True, verbose_name="ID кафе",
+    )
+    cafe_name = models.CharField(
+        verbose_name="Название кафе", max_length=1000, default=" "
+    )
+    cafe_description = models.CharField(
+        verbose_name="Описание кафе", max_length=1000,
+    )
+    cafe_rating = models.FloatField(
+        verbose_name="Рейтинг кафе",
+    )
+    cafe_coordinates = models.ForeignKey(
+        Coordinates, on_delete=models.CASCADE, verbose_name="Координаты кафе",
+    )
+    cafe_owner = models.ForeignKey(
+        Owner, on_delete=models.CASCADE, verbose_name="Владелец кафе",
+    )
+    cafe_menu = models.ManyToManyField(
+        Item,
+        verbose_name="Меню",
+    )
+    cafe_opening_hours = models.ForeignKey(
+        OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
+    )
+    add_time = models.DateTimeField(verbose_name='Дата добавления', default=django.utils.timezone.now)
+
+    def __str__(self):
+        return self.cafe_name
+
+
+class Client(models.Model):
+    client_id = models.AutoField(
+        primary_key=True, verbose_name="id клиента"
+    )
+    first_name = models.CharField(
+        verbose_name="Имя", max_length=100
+    )
+    second_name = models.CharField(
+        verbose_name="Фамилия", max_length=100
+    )
+    patronymic = models.CharField(
+        verbose_name="Отчество", max_length=100
+    )
+    phone_number = models.CharField(
+        verbose_name="Номер телефона", max_length=12
+    )
+
+    def __str__(self):
+        return str(self.second_name) + str(self.first_name)
+
+
 class WaitList(models.Model):
     order_id = models.AutoField(
         primary_key=True
@@ -123,10 +191,13 @@ class WaitList(models.Model):
     amount_6 = models.IntegerField(
         verbose_name="Количество", blank=True, null=True
     )
-# TODO: Client class
-#    client = models.ForeignKey(
-#       Client, on_delete=models.CASCADE, verbose_name="Заказчик",
-#    )
+    client = models.ForeignKey(
+        Client, on_delete=models.CASCADE, verbose_name="Заказчик",
+       )
+    cafe_id = models.ForeignKey(
+        Cafe, verbose_name="Кафе", on_delete=models.CASCADE
+    )
+
     time_to_take = models.TimeField(
         verbose_name="Заказ будет готов к "
     )
@@ -141,54 +212,3 @@ class WaitList(models.Model):
         return 'Заказ №' + str(self.order_id) + " (Готов к " + str(self.time_to_take)[:-3] + ")"
 
 
-class OpeningHours(models.Model):
-    opening_hours_id = models.AutoField(
-        primary_key=True,
-    )
-    opening_time = models.TimeField(
-        verbose_name="Время открытия"
-    )
-    closing_time = models.TimeField(
-        verbose_name="Время закрытия"
-    )
-
-    def __str__(self):
-        return str(self.opening_time) + " -- " + str(self.closing_time)
-
-
-class Cafe(models.Model):
-    cafe_id = models.AutoField(
-        primary_key=True, verbose_name="ID кафе",
-    )
-    cafe_name = models.CharField(
-        verbose_name="Название кафе", max_length=1000, default=" "
-    )
-    cafe_description = models.CharField(
-        verbose_name="Описание кафе", max_length=1000,
-    )
-    cafe_rating = models.FloatField(
-        verbose_name="Рейтинг кафе",
-    )
-    cafe_coordinates = models.ForeignKey(
-        Coordinates, on_delete=models.CASCADE, verbose_name="Координаты кафе",
-    )
-    cafe_owner = models.ForeignKey(
-        Owner, on_delete=models.CASCADE, verbose_name="Владелец кафе",
-    )
-    cafe_menu = models.ManyToManyField(
-        Item,
-        verbose_name="Меню",
-    )
-    # cafe_waitList = models.ForeignKey(
-    #     WaitList,
-    #     verbose_name="Список заказов",
-    #     on_delete=models.CASCADE,
-    #     null=True
-    # )
-    cafe_opening_hours = models.ForeignKey(
-        OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
-    )
-    add_time = models.DateTimeField(verbose_name='Дата добавления', default=django.utils.timezone.now)
-
-    def __str__(self):
-        return self.cafe_name

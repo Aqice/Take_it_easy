@@ -5,6 +5,7 @@ from .models import OpeningHours
 from .models import Owner
 from .models import Item
 from .models import WaitList
+from .models import Client
 
 
 class CafeListAdmin(admin.ModelAdmin):
@@ -16,9 +17,10 @@ class CafeListAdmin(admin.ModelAdmin):
 
 
 class WaitListAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'time_to_take']
-    list_display_links = ['time_to_take', '__str__']
+    list_display = ['__str__', 'time_to_take', 'cafe_id']
+    list_display_links = ['time_to_take', '__str__', 'cafe_id']
     list_filter = ['time_to_take', 'order_id']
+
 
 admin.site.register(WaitList, WaitListAdmin)
 admin.site.register(Cafe, CafeListAdmin)
@@ -26,3 +28,4 @@ admin.site.register(Coordinates)
 admin.site.register(OpeningHours)
 admin.site.register(Owner)
 admin.site.register(Item)
+admin.site.register(Client)
