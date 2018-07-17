@@ -256,6 +256,14 @@ def get_item_by_id(request):
 
 @csrf_exempt
 def get_all_cafes(request):
+    """
+
+        Функция для получения списка всех кафе
+
+        Параметры отсутсвуют
+
+        return: список всех кафе, если все прошло штатно
+    """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
@@ -266,6 +274,19 @@ def get_all_cafes(request):
 
 @csrf_exempt
 def create_new_wait_list(request):
+    """
+
+        Функция для создания нового списка ожидания для кафе
+
+        Параметры:
+            - блюда (`items`) в json
+            - количества каждого блюда (`amounts`) в json
+            - id клиента (`client_id`)
+            - id кафе (`cafe_id`)
+            - время, к которому необходимо приготовить заказ (`time_to_take`) в формате xx.yy.zz
+
+        return: номер заказа (`order_id`), если все прошло штатно
+    """
     if request.method != "POST":
         return HttpResponseBadRequest("Incorrect type of request. POST needed.")
 
@@ -286,15 +307,27 @@ def create_new_wait_list(request):
     except JSONDecodeError:
         return HttpResponseBadRequest("Invalid JSON format in amount")
     if len(items) != len(amounts):
-        return HttpResponseBadRequest("Lenght of amounts and items are not the same")
+        return HttpResponseBadRequest("Length of amounts and items are not the same")
 
-    # Сделать по аналогии:
     try:
         client_id = request.POST["client_id"]
+    except KeyError:
+        return HttpResponseBadRequest("No id in request")
+    except ObjectDoesNotExist:
+        return HttpResponseBadRequest("No object with your id")
+
+    try:
         cafe_id = request.POST["cafe_id"]
+        # как поведет себя этот метод, если для кафе с таким cafe_id уже существует waitlist?
+    except KeyError:
+        return HttpResponseBadRequest("No id in request")
+    except ObjectDoesNotExist:
+        return HttpResponseBadRequest("No object with your id")
+
+    try:
         time_to_take = request.POST["time_to_take"]
-    except Exception:
-        return HttpResponseBadRequest("прописать ошибки")
+    except KeyError:
+        return HttpResponseBadRequest("Bad time format")
 
     wait_list = {
         1: WaitList(
@@ -389,11 +422,23 @@ def create_new_wait_list(request):
 
 @csrf_exempt
 def get_all_wait_lists_by_cafe_id(request):
+    """
+
+        Функция для получения списка заказов по `cafe_id`
+
+        Параметры:
+            - `cafe_id`: ID кафе, список заказов которого нужно получить
+
+        return: список из заказов (`WaitList`), если все прошло штатно
+    """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
-
-    # Добавить проверки как в функции ```get_item_by_id```
-    wait_list = WaitList.objects.get(cafe_id=request.GET["cafe_id"])
+    try:
+        wait_list = WaitList.objects.get(cafe_id=request.GET["cafe_id"])
+    except KeyError:
+        return HttpResponseBadRequest("No id in request")
+    except ObjectDoesNotExist:
+        return HttpResponseBadRequest("No object with your id")
     serialized_obj = serializers.serialize('json', [wait_list, ])
 
     return HttpResponse(serialized_obj)
