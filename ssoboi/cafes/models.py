@@ -73,6 +73,9 @@ class Item(models.Model):
         verbose_name="Фото элемента",
         blank=True
     )
+    item_cost = models.IntegerField(
+        verbose_name="Цена товара"
+    )
 
     def __str__(self):
         return str(self.item_name) + ' - ' + str(self.item_description)
@@ -192,7 +195,7 @@ class WaitList(models.Model):
         verbose_name="Количество", blank=True, null=True
     )
     client = models.ForeignKey(
-        Client, on_delete=models.CASCADE, verbose_name="Заказчик",
+        Client, on_delete=models.CASCADE, verbose_name="Клиент",
        )
     cafe_id = models.ForeignKey(
         Cafe, verbose_name="Кафе", on_delete=models.CASCADE

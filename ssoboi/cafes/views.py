@@ -1,8 +1,14 @@
-from .models import Cafe, Coordinates, Owner, OpeningHours, Item
+from json import JSONDecodeError
+
+from django.http import JsonResponse
+
+from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
+
 import json
 
 
@@ -238,9 +244,156 @@ def get_item_by_id(request):
 
     try:
         item = Item.objects.get(item_id=int(request.GET["id"]))
-    except:
-        return HttpResponseBadRequest("id is invalid")
+    except KeyError:
+        return HttpResponseBadRequest("No id in request")
+    except ObjectDoesNotExist:
+        return HttpResponseBadRequest("No object with your id")
 
     serialized_obj = serializers.serialize('json', [item, ])
+
+    return HttpResponse(serialized_obj)
+
+
+@csrf_exempt
+def get_all_cafes(request):
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    cafe_json = serializers.serialize("json", Cafe.objects.all())
+
+    return HttpResponse(cafe_json)
+
+
+@csrf_exempt
+def create_new_wait_list(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
+
+    try:
+        items = json.loads(request.POST["items"])
+
+    except KeyError:
+        return HttpResponseBadRequest("No items in request")
+    except JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON format in items")
+    if len(items) > 6:
+        return HttpResponseBadRequest("Too many items. Maximum is 6")
+
+    try:
+        amounts = json.loads(request.POST["amounts"])
+    except KeyError:
+        return HttpResponseBadRequest("No amount in request")
+    except JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON format in amount")
+    if len(items) != len(amounts):
+        return HttpResponseBadRequest("Lenght of amounts and items are not the same")
+
+    # Сделать по аналогии:
+    try:
+        client_id = request.POST["client_id"]
+        cafe_id = request.POST["cafe_id"]
+        time_to_take = request.POST["time_to_take"]
+    except Exception:
+        return HttpResponseBadRequest("прописать ошибки")
+
+    wait_list = {
+        1: WaitList(
+            item_1=items[0],
+            amount_1=amounts[0],
+            client=client_id,
+            cafe_id=cafe_id,
+            time_to_take=time_to_take,
+            paid=False,
+            done=False
+        ),
+        2: WaitList(
+            item_1=items[0],
+            amount_1=amounts[0],
+            item_2=items[1],
+            amount_2=amounts[1],
+            client=client_id,
+            cafe_id=cafe_id,
+            time_to_take=time_to_take,
+            paid=False,
+            done=False
+        ),
+        3: WaitList(
+            item_1=items[0],
+            amount_1=amounts[0],
+            item_2=items[1],
+            amount_2=amounts[1],
+            item_3=items[2],
+            amount_3=amounts[2],
+            client=client_id,
+            cafe_id=cafe_id,
+            time_to_take=time_to_take,
+            paid=False,
+            done=False
+        ),
+        4: WaitList(
+            item_1=items[0],
+            amount_1=amounts[0],
+            item_2=items[1],
+            amount_2=amounts[1],
+            item_3=items[2],
+            amount_3=amounts[2],
+            item_4=items[3],
+            amount_4=amounts[3],
+            client=client_id,
+            cafe_id=cafe_id,
+            time_to_take=time_to_take,
+            paid=False,
+            done=False
+        ),
+        5: WaitList(
+            item_1=items[0],
+            amount_1=amounts[0],
+            item_2=items[1],
+            amount_2=amounts[1],
+            item_3=items[2],
+            amount_3=amounts[2],
+            item_4=items[3],
+            amount_4=amounts[3],
+            item_5=items[4],
+            amount_5=amounts[4],
+            client=client_id,
+            cafe_id=cafe_id,
+            time_to_take=time_to_take,
+            paid=False,
+            done=False
+        ),
+        6: WaitList(
+            item_1=items[0],
+            amount_1=amounts[0],
+            item_2=items[1],
+            amount_2=amounts[1],
+            item_3=items[2],
+            amount_3=amounts[2],
+            item_4=items[3],
+            amount_4=amounts[3],
+            item_5=items[4],
+            amount_5=amounts[4],
+            item_6=items[5],
+            amount_6=amounts[5],
+            client=client_id,
+            cafe_id=cafe_id,
+            time_to_take=time_to_take,
+            paid=False,
+            done=False
+        ),
+    }[len(items)]
+    wait_list.save()
+
+    return HttpResponse(wait_list.order_id)
+
+
+@csrf_exempt
+def get_all_wait_lists_by_id(request):
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+
+    # Добавить проверки как в функции ```get_item_by_id```
+    wait_list = WaitList.objects.get(order_id=request.GET["wait_list_id"])
+    serialized_obj = serializers.serialize('json', [wait_list, ])
 
     return HttpResponse(serialized_obj)
