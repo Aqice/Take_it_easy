@@ -444,7 +444,10 @@ def get_all_wait_lists_by_cafe_id(request):
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
     try:
-        wait_list = WaitList.objects.get(cafe_id=request.GET["cafe_id"])
+        wait_list = WaitList.objects.get(
+            cafe_id=request.GET["cafe_id"],
+            done=False
+        )
     except KeyError:
         return HttpResponseBadRequest("No id in request")
     except ObjectDoesNotExist:
@@ -452,3 +455,66 @@ def get_all_wait_lists_by_cafe_id(request):
     serialized_obj = serializers.serialize('json', [wait_list, ])
 
     return HttpResponse(serialized_obj)
+
+
+@csrf_exempt
+def change_wait_list_paid_status(request):
+    """
+
+        Функция для изменения статуса done у объекта WaitList по `wait_list_id`
+
+        Параметры:
+            - `wait_list_id`: ID WaitList, статус которого нужно изменить
+
+        return: Новый статус объекта WaitList, если всё прошло штатно
+    """
+    if request.method != "POST":
+        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
+
+    try:
+        wait_list = WaitList.objects.get(
+            order_id=request.POST["wait_list_id"]
+        )
+    except KeyError:
+        return HttpResponseBadRequest("No wait_list_id in request")
+    except ObjectDoesNotExist:
+        return HttpResponseBadRequest("No WaitList object with this ID")
+    if wait_list.done:
+        return HttpResponseBadRequest("WaitList object done status already is True")
+
+    wait_list.done = True
+    wait_list.save()
+    return HttpResponse(wait_list.done)
+
+
+@csrf_exempt
+def add_new_client(request):
+    """
+
+       Функция для добавления нового клиента. POST запрос
+
+       Параметры:
+           - `client_id`: id клиента(id чата в телеграме)
+           - `first_name`: Имя
+           - `second_name`: Фамилия
+           - `patronymic`: Отчество
+           - 'phone_number': Номер телефона клиента
+
+       return: ID созданнаго клиентау
+       """
+    if request.method != "POST":
+        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
+    try:
+        client = Client(
+            client_id=request.POST["client_id"],
+            first_name=request.POST["first_name"],
+            second_name=request.POST["second_name"],
+            patronymic=request.POST["patronymic"],
+            phone_number=request.POST["phone_number"]
+        )
+
+    except KeyError as e:
+        return HttpResponseBadRequest("No " + e.args[0][1:-1] + " in request")
+
+    client.save()
+    return HttpResponse(client.client_id)
