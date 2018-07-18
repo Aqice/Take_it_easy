@@ -499,8 +499,8 @@ def add_new_client(request):
            - `second_name`: Фамилия
            - `patronymic`: Отчество
            - 'phone_number': Номер телефона клиента
-
-       return: ID созданнаго клиентау
+        Возвращает:
+            ID созданнаго клиентау
        """
     if request.method != "POST":
         return HttpResponseBadRequest("Incorrect type of request. POST needed.")
@@ -518,3 +518,25 @@ def add_new_client(request):
 
     client.save()
     return HttpResponse(client.client_id)
+
+
+@csrf_exempt
+def check_user_in_database(request):
+    """
+
+       Функция для регестрации пользователя. GET запрос
+
+       Параметры:
+           - `client_id`: id клиента(id чата в телеграме)
+       Возвращает:
+           True -- клиент зарегестрирован,
+           False -- клиент не зарегестрирован
+       """
+    if request.method != "GET":
+        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
+    try:
+        client_id = request.GET["client_id"]
+    except KeyError:
+        return HttpResponseBadRequest("No client_id in request")
+
+    return HttpResponse(Client.objects.filter(client_id=client_id).exists())
