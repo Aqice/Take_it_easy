@@ -2,7 +2,7 @@ from json import JSONDecodeError
 
 from django.http import JsonResponse
 
-from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList
+from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList, Client
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
@@ -279,8 +279,8 @@ def create_new_wait_list(request):
         Функция для создания нового списка ожидания для кафе
 
         Параметры:
-            - блюда (`items`) в json
-            - количества каждого блюда (`amounts`) в json
+            - блюда (`items`) массив в json
+            - количества каждого блюда (`amounts`) массив в json
             - id клиента (`client_id`)
             - id кафе (`cafe_id`)
             - время, к которому необходимо приготовить заказ (`time_to_take`) в формате xx.yy.zz
@@ -290,15 +290,18 @@ def create_new_wait_list(request):
     if request.method != "POST":
         return HttpResponseBadRequest("Incorrect type of request. POST needed.")
 
+    print(request.POST.get("cafe_id"))
+
     try:
         items = json.loads(request.POST["items"])
-
     except KeyError:
         return HttpResponseBadRequest("No items in request")
     except JSONDecodeError:
         return HttpResponseBadRequest("Invalid JSON format in items")
     if len(items) > 6:
         return HttpResponseBadRequest("Too many items. Maximum is 6")
+    if len(items) < 1:
+        return HttpResponseBadRequest("No items.")
 
     try:
         amounts = json.loads(request.POST["amounts"])
@@ -312,7 +315,7 @@ def create_new_wait_list(request):
     try:
         client_id = request.POST["client_id"]
     except KeyError:
-        return HttpResponseBadRequest("No id in request")
+        return HttpResponseBadRequest("No client_id in request")
     except ObjectDoesNotExist:
         return HttpResponseBadRequest("No object with your id")
 
@@ -329,92 +332,99 @@ def create_new_wait_list(request):
     except KeyError:
         return HttpResponseBadRequest("Bad time format")
 
-    wait_list = {
-        1: WaitList(
-            item_1=items[0],
+    print(len(items))
+
+    if len(items) == 1:
+        wait_list = WaitList(
+            item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            client=client_id,
-            cafe_id=cafe_id,
+            client=Client.objects.get(client_id=client_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
             done=False
-        ),
-        2: WaitList(
-            item_1=items[0],
+        )
+    elif len(items) == 2:
+        wait_list = WaitList(
+            item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            item_2=items[1],
+            item_2=Item.objects.get(item_id=items[1]),
             amount_2=amounts[1],
-            client=client_id,
-            cafe_id=cafe_id,
+            client=Client.objects.get(client_id=client_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
             done=False
-        ),
-        3: WaitList(
-            item_1=items[0],
+        )
+    elif len(items) == 3:
+        wait_list = WaitList(
+            item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            item_2=items[1],
+            item_2=Item.objects.get(item_id=items[1]),
             amount_2=amounts[1],
-            item_3=items[2],
+            item_3=Item.objects.get(item_id=items[2]),
             amount_3=amounts[2],
-            client=client_id,
-            cafe_id=cafe_id,
+            client=Client.objects.get(client_id=client_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
             done=False
-        ),
-        4: WaitList(
-            item_1=items[0],
+        )
+    elif len(items) == 4:
+        wait_list = WaitList(
+            item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            item_2=items[1],
+            item_2=Item.objects.get(item_id=items[1]),
             amount_2=amounts[1],
-            item_3=items[2],
+            item_3=Item.objects.get(item_id=items[2]),
             amount_3=amounts[2],
-            item_4=items[3],
+            item_4=Item.objects.get(item_id=items[3]),
             amount_4=amounts[3],
-            client=client_id,
-            cafe_id=cafe_id,
+            client=Client.objects.get(client_id=client_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
             done=False
-        ),
-        5: WaitList(
-            item_1=items[0],
+        )
+    elif len(items) == 5:
+        wait_list = WaitList(
+            item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            item_2=items[1],
+            item_2=Item.objects.get(item_id=items[1]),
             amount_2=amounts[1],
-            item_3=items[2],
+            item_3=Item.objects.get(item_id=items[2]),
             amount_3=amounts[2],
-            item_4=items[3],
+            item_4=Item.objects.get(item_id=items[3]),
             amount_4=amounts[3],
-            item_5=items[4],
+            item_5=Item.objects.get(item_id=items[4]),
             amount_5=amounts[4],
-            client=client_id,
-            cafe_id=cafe_id,
+            client=Client.objects.get(client_id=client_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
             done=False
-        ),
-        6: WaitList(
-            item_1=items[0],
+        )
+    elif len(items) == 6:
+        wait_list = WaitList(
+            item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            item_2=items[1],
+            item_2=Item.objects.get(item_id=items[1]),
             amount_2=amounts[1],
-            item_3=items[2],
+            item_3=Item.objects.get(item_id=items[2]),
             amount_3=amounts[2],
-            item_4=items[3],
+            item_4=Item.objects.get(item_id=items[3]),
             amount_4=amounts[3],
-            item_5=items[4],
+            item_5=Item.objects.get(item_id=items[4]),
             amount_5=amounts[4],
-            item_6=items[5],
+            item_6=Item.objects.get(item_id=items[5]),
             amount_6=amounts[5],
-            client=client_id,
-            cafe_id=cafe_id,
+            client=Client.objects.get(client_id=client_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
             done=False
-        ),
-    }[len(items)]
+        )
+
     wait_list.save()
 
     return HttpResponse(wait_list.order_id)
