@@ -290,8 +290,6 @@ def create_new_wait_list(request):
     if request.method != "POST":
         return HttpResponseBadRequest("Incorrect type of request. POST needed.")
 
-    print(request.POST.get("cafe_id"))
-
     try:
         items = json.loads(request.POST["items"])
     except KeyError:
