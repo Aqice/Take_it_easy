@@ -330,8 +330,6 @@ def create_new_wait_list(request):
     except KeyError:
         return HttpResponseBadRequest("Bad time format")
 
-    print(len(items))
-
     if len(items) == 1:
         wait_list = WaitList(
             item_1=Item.objects.get(item_id=items[0]),
