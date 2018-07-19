@@ -97,7 +97,7 @@ class OpeningHours(models.Model):
 
 
 class Cafe(models.Model):
-    cafe_id = models.AutoField(
+    cafe_id = models.IntegerField(
         primary_key=True, verbose_name="ID кафе",
     )
     cafe_name = models.CharField(
