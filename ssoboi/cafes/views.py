@@ -1,16 +1,15 @@
+import json
 from json import JSONDecodeError
 
-from django.http import JsonResponse
+from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList, Client
 
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.views.decorators.csrf import csrf_exempt
-from django.core import serializers
-from django.core.exceptions import ObjectDoesNotExist
 
-import json
-
+# ToDo Сделать нормальные доки, с примерами выдачи, объяснениями каждого поля в выдаче и на входе
 
 @csrf_exempt
 def add_cafe(request):
@@ -96,8 +95,9 @@ def get_cafe_by_id(request):
     except:
         return HttpResponseBadRequest("cafe_id is invalid")
 
-    serialized_obj = serializers.serialize('json', [cafe, ])
-    return HttpResponse(serialized_obj)
+    print(cafe.to_dict())
+
+    return HttpResponse(json.dumps(cafe.to_dict()))
 
 
 @csrf_exempt

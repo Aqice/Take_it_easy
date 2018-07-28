@@ -17,6 +17,12 @@ class Coordinates(models.Model):
     def __str__(self):
         return "Широта: " + str(self.lat) + " Долгота:" + str(self.lon)
 
+    def get_lat(self):
+        return self.lat
+
+    def get_lon(self):
+        return self.lon
+
 
 class Owner(models.Model):
     owner_id = models.AutoField(
@@ -34,6 +40,14 @@ class Owner(models.Model):
 
     def __str__(self):
         return self.owner_name
+
+    def to_dict(self):
+        return {
+            "owner_id": self.owner_id,
+            "owner_name": self.owner_name,
+            "owner_phone_number": self.owner_phone_number,
+            "owner_email": self.owner_email
+        }
 
 
 class CafeMedia(models.Model):
@@ -95,9 +109,12 @@ class OpeningHours(models.Model):
     def __str__(self):
         return str(self.opening_time) + " -- " + str(self.closing_time)
 
+    def get_opening_hours(self):
+        return [str(self.opening_time), str(self.closing_time)]
+
 
 class Cafe(models.Model):
-    cafe_id = models.IntegerField(
+    cafe_id = models.AutoField(
         primary_key=True, verbose_name="ID кафе",
     )
     cafe_name = models.CharField(
@@ -127,7 +144,24 @@ class Cafe(models.Model):
     def __str__(self):
         return self.cafe_name
 
+    def to_dict(self):
+        print(Item.objects.filter())
+        dict_for_return = {
+            "cafe_id": self.cafe_id,
+            "cafe_name": self.cafe_name,
+            "cafe_description": self.cafe_description,
+            "cafe_rating": self.cafe_rating,
+            "lat": self.cafe_coordinates.get_lon(),
+            "lon": self.cafe_coordinates.get_lat(),
+            "cafe_owner": self.cafe_owner.to_dict(),
+            # ToDo Сделать выдачу листа из Item'ов
+            "cafe_opening_hours": self.cafe_opening_hours.get_opening_hours(),
+            "add_time": str(self.add_time)
+        }
+        return dict_for_return
 
+
+# ToDo Убрать остюда объект клиента и создать отдельное приложение и там создать модель
 class Client(models.Model):
     client_id = models.AutoField(
         primary_key=True, verbose_name="id клиента"
@@ -149,6 +183,7 @@ class Client(models.Model):
         return str(self.second_name) + str(self.first_name)
 
 
+# ToDo Переписать, выглядит крайне погано, подумать, как лучше сделать
 class WaitList(models.Model):
     order_id = models.AutoField(
         primary_key=True
@@ -196,7 +231,7 @@ class WaitList(models.Model):
     )
     client = models.ForeignKey(
         Client, on_delete=models.CASCADE, verbose_name="Клиент",
-       )
+    )
     cafe_id = models.ForeignKey(
         Cafe, verbose_name="Кафе", on_delete=models.CASCADE
     )
@@ -213,5 +248,3 @@ class WaitList(models.Model):
 
     def __str__(self):
         return 'Заказ №' + str(self.order_id) + " (Готов к " + str(self.time_to_take)[:-3] + ")"
-
-
