@@ -95,8 +95,6 @@ def get_cafe_by_id(request):
     except:
         return HttpResponseBadRequest("cafe_id is invalid")
 
-    print(cafe.to_dict())
-
     return HttpResponse(json.dumps(cafe.to_dict()))
 
 

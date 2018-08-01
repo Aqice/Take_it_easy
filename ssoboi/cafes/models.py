@@ -26,10 +26,12 @@ class Coordinates(models.Model):
 
 class Owner(models.Model):
     owner_id = models.AutoField(
-        primary_key=True, verbose_name="ID владельца",
+        primary_key=True,
+        verbose_name="ID владельца",
     )
     owner_name = models.CharField(
-        verbose_name="ФИО владельца", max_length=1000,
+        verbose_name="ФИО владельца",
+        max_length=1000,
     )
     owner_phone_number = models.TextField(
         verbose_name="Телефон владельца",
@@ -70,7 +72,8 @@ class Item(models.Model):
         primary_key=True
     )
     item_name = models.CharField(
-        verbose_name="Название элемента", max_length=1000,
+        verbose_name="Название элемента",
+        max_length=1000,
     )
     item_description = models.TextField(
         verbose_name="Описание элемента"
@@ -115,37 +118,56 @@ class OpeningHours(models.Model):
 
 class Cafe(models.Model):
     cafe_id = models.AutoField(
-        primary_key=True, verbose_name="ID кафе",
+        primary_key=True,
+        verbose_name="ID кафе",
     )
     cafe_name = models.CharField(
-        verbose_name="Название кафе", max_length=1000, default=" "
+        verbose_name="Название кафе",
+        max_length=1000,
+        default=" "
     )
     cafe_description = models.CharField(
-        verbose_name="Описание кафе", max_length=1000,
+        verbose_name="Описание кафе",
+        max_length=1000,
     )
     cafe_rating = models.FloatField(
         verbose_name="Рейтинг кафе",
     )
     cafe_coordinates = models.ForeignKey(
-        Coordinates, on_delete=models.CASCADE, verbose_name="Координаты кафе",
+        Coordinates,
+        on_delete=models.CASCADE,
+        verbose_name="Координаты кафе",
     )
     cafe_owner = models.ForeignKey(
-        Owner, on_delete=models.CASCADE, verbose_name="Владелец кафе",
+        Owner,
+        on_delete=models.CASCADE,
+        verbose_name="Владелец кафе",
     )
     cafe_menu = models.ManyToManyField(
         Item,
         verbose_name="Меню",
     )
     cafe_opening_hours = models.ForeignKey(
-        OpeningHours, on_delete=models.CASCADE, verbose_name="Часы работы кафе"
+        OpeningHours,
+        on_delete=models.CASCADE,
+        verbose_name="Часы работы кафе"
     )
-    add_time = models.DateTimeField(verbose_name='Дата добавления', default=django.utils.timezone.now)
+    add_time = models.DateTimeField(
+        verbose_name='Дата добавления',
+        default=django.utils.timezone.now
+    )
 
     def __str__(self):
         return self.cafe_name
 
     def to_dict(self):
-        print(Item.objects.filter())
+
+        cafe_menu = []
+        for i in (self.cafe_menu.all()):
+            temp = i.__dict__
+            del temp["_state"]
+            cafe_menu.append(temp)
+
         dict_for_return = {
             "cafe_id": self.cafe_id,
             "cafe_name": self.cafe_name,
@@ -154,7 +176,7 @@ class Cafe(models.Model):
             "lat": self.cafe_coordinates.get_lon(),
             "lon": self.cafe_coordinates.get_lat(),
             "cafe_owner": self.cafe_owner.to_dict(),
-            # ToDo Сделать выдачу листа из Item'ов
+            "cafe_menu": cafe_menu,
             "cafe_opening_hours": self.cafe_opening_hours.get_opening_hours(),
             "add_time": str(self.add_time)
         }
@@ -164,19 +186,24 @@ class Cafe(models.Model):
 # ToDo Убрать остюда объект клиента и создать отдельное приложение и там создать модель
 class Client(models.Model):
     client_id = models.AutoField(
-        primary_key=True, verbose_name="id клиента"
+        primary_key=True,
+        verbose_name="id клиента"
     )
     first_name = models.CharField(
-        verbose_name="Имя", max_length=100
+        verbose_name="Имя",
+        max_length=100
     )
     second_name = models.CharField(
-        verbose_name="Фамилия", max_length=100
+        verbose_name="Фамилия",
+        max_length=100
     )
     patronymic = models.CharField(
-        verbose_name="Отчество", max_length=100
+        verbose_name="Отчество",
+        max_length=100
     )
     phone_number = models.CharField(
-        verbose_name="Номер телефона", max_length=12
+        verbose_name="Номер телефона",
+        max_length=12
     )
 
     def __str__(self):
