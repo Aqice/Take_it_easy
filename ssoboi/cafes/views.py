@@ -15,7 +15,8 @@ from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList, Clie
 def add_cafe(request):
     """
 
-    Функция для добавления нового кафе. POST запрос
+    **Функция для добавления нового кафе.**
+    POST запрос
 
     Параметры:
         - `owner_name`: ФИО владельца
@@ -84,9 +85,34 @@ def get_cafe_by_id(request):
     Функция для получение информации о кафе. GET запрос
 
     Параметры:
-          - 'cafe_id': ID кафе, информацию которого нужно получить
+      * cafe_id - ID кафе, информацию которого нужно получить
 
-     return: информация о кафе
+    Возвращаемый словарь:
+      * cafe_id - ID кафе
+      * cafe_name - Название кафе
+      * cafe_description - Описание кафе
+      * cafe_rating - Рэйтинг кафе
+      * lat - Координата широты кафе
+      * lon - Координата долготы кафе
+      * cafe_owner - Владелец кафе объект типа :model:`cafes.Owner`, пердставляет словарь с полями:\n
+        * owner_id - ID владельца кафе
+        * owner_name - Имя владельца кафе
+        * owner_phone_number - Номер телефона владельца кафе
+        * owner_email - Почта владельца кафе
+      * cafe_menu - Мень кафе, список объектов типа :model:`cafes.Item`, где каждый элемент списка словарь с полями:\n
+        * item_id - ID продукта
+        * item_name - Название продукта
+        * item_description - Описание продукта
+        * item_time - Время приготовления продукта
+        * item_icon - Иконка продукта
+        * item_image - Фотография продукта
+        * item_cost - Цена продукта
+      * cafe_opening_hours - Лист \n
+        * нулевой элемент - время открытия кафе
+        * первый элемент - время закрытия кафе
+      * add_time - Время добавления кафе в систему
+
+
     """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
@@ -102,15 +128,15 @@ def get_cafe_by_id(request):
 def remove_cafe(request):
     """
 
-        Функция для удаления кафе. GET запрос
+        Функция для удаления кафе. POST запрос
 
         Параметры:
             - `cafe_id`: ID кафе, которое нужно удалить
 
         return: 1, если всё прошло штатно
         """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
+    if request.method != "POST":
+        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
 
     try:
         cafe = Cafe.objects.get(cafe_id=request.GET["cafe_id"])
@@ -124,14 +150,17 @@ def remove_cafe(request):
 @csrf_exempt
 def get_cafe_by_coord(request):
     """
-    Функция для получения информации о кафе по координатам. GET запрос
+    Функция для получения информации ID ближайших кафе по координатам. GET запрос
 
     Параметры:
-        - 'lat': широта
-        - 'lon': долгота
-        - 'r': радиус
+      * lat - широта
+      * lon - долгота
+      * r - радиус
 
-    return: список `cafe_id`, если всё прошло штатно
+    Возвращает:
+      * список `cafe_id`
+
+    Для получения полной информации о кафе нужно воспользоваться функцией :view:`cafes.views.get_cafe_by_id`
     """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
@@ -162,9 +191,10 @@ def get_coord_by_id(request):
         Функция для получения координат кафе по cafe_id. GET запрос
 
         Параметры:
-            - 'cafe_id': ID кафе, координаты которого нужно получить
+          * cafe_id - ID кафе, координаты которого нужно получить
 
-        return: `coordinates`, если все прошло штатно
+        Возвращает:
+          * Объект :model:`cafes.Coordinates`
     """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
@@ -185,9 +215,10 @@ def get_owner_by_id(request):
         Функция для получения владельца кафе по cafe_id. GET запрос
 
         Параметры:
-            - `cafe_id`: ID кафе, владельца которого нужно получить
+          * cafe_id - ID кафе, владельца которого нужно получить
 
-        return: owner, если все прошло штатно
+        Возвращает:
+          * Объект :model:`cafes.Owner`
     """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
@@ -209,9 +240,10 @@ def get_cafe_opening_hours_by_id(request):
         Функция для получения времени работы кафе по cafe_id. GET запрос
 
         Параметры:
-            - `cafe_id`: ID кафе, время работы которого нужно получить
+          * cafe_id - ID кафе, время работы которого нужно получить
 
-        return: `cafe_opening_hours`, если все прошло штатно
+        Возвращает:
+         * Объект :model:`cafes.OpeningHours`
     """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
@@ -230,12 +262,13 @@ def get_cafe_opening_hours_by_id(request):
 def get_item_by_id(request):
     """
 
-        Функция для получения элемента меню кафе по item_id. GET запрос
+        Функция для получения продукта по его ID. GET запрос
 
         Параметры:
-            - `item_id`: ID элемента, который нужно получить
+          * item_id - ID элемента, который нужно получить
 
-        return: информация об элементе меню (`item`), если все прошло штатно
+        Возвращает:
+          * Объект :model:`cafes.Item`
     """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
@@ -256,11 +289,12 @@ def get_item_by_id(request):
 def get_all_cafes(request):
     """
 
-        Функция для получения списка всех кафе
+        Функция для получения списка всех ID
 
         Параметры отсутсвуют
 
-        return: список всех кафе, если все прошло штатно
+        Возвращает:
+          * Список ID объектов :model:`cafes.Cafe`
     """
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")

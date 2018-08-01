@@ -5,6 +5,7 @@ import django.utils.timezone
 class Coordinates(models.Model):
     coordinates_id = models.AutoField(
         primary_key=True,
+        verbose_name="id координат"
     )
 
     lat = models.FloatField(
@@ -161,7 +162,6 @@ class Cafe(models.Model):
         return self.cafe_name
 
     def to_dict(self):
-
         cafe_menu = []
         for i in (self.cafe_menu.all()):
             temp = i.__dict__
