@@ -9,8 +9,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList, Client
 
 
-# ToDo Сделать нормальные доки, с примерами выдачи, объяснениями каждого поля в выдаче и на входе
-
 @csrf_exempt
 def add_cafe(request):
     """
