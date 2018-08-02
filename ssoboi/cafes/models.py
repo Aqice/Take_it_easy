@@ -118,6 +118,7 @@ class OpeningHours(models.Model):
 
 
 class Cafe(models.Model):
+    # ToDo сделать отдельное поле для отзывов, связать с объектом кафе и клиента
     cafe_id = models.AutoField(
         primary_key=True,
         verbose_name="ID кафе",
@@ -163,8 +164,8 @@ class Cafe(models.Model):
 
     def to_dict(self):
         cafe_menu = []
-        for i in (self.cafe_menu.all()):
-            temp = i.__dict__
+        for item in (self.cafe_menu.all()):
+            temp = item.__dict__
             del temp["_state"]
             cafe_menu.append(temp)
 
@@ -173,8 +174,8 @@ class Cafe(models.Model):
             "cafe_name": self.cafe_name,
             "cafe_description": self.cafe_description,
             "cafe_rating": self.cafe_rating,
-            "lat": self.cafe_coordinates.get_lon(),
-            "lon": self.cafe_coordinates.get_lat(),
+            "lon": self.cafe_coordinates.get_lon(),
+            "lat": self.cafe_coordinates.get_lat(),
             "cafe_owner": self.cafe_owner.to_dict(),
             "cafe_menu": cafe_menu,
             "cafe_opening_hours": self.cafe_opening_hours.get_opening_hours(),

@@ -156,7 +156,10 @@ def get_cafe_by_coord(request):
       * r - радиус
 
     Возвращает:
-      * список `cafe_id`
+      * список словарей, в каждом из которых есть следующие ключи\n
+        * cafe_id - ID объекта :model:`cafes.Cafe`
+        * cafe_lat - Координата широты кафе
+        * cafe_lon - Координата долготы кафе
 
     Для получения полной информации о кафе нужно воспользоваться функцией :view:`cafes.views.get_cafe_by_id`
     """
@@ -173,13 +176,17 @@ def get_cafe_by_coord(request):
     r2 = r ** 2
 
     all_cafes = Cafe.objects.all()
-    id_of_cafes_in_circle = []
+    cafes_in_circle_info = []
 
     for cafe in all_cafes:
         if (cafe.cafe_coordinates.lat - lat) ** 2 + (cafe.cafe_coordinates.lon - lon) ** 2 <= r2:
-            id_of_cafes_in_circle.append(cafe.cafe_id)
+            cafes_in_circle_info.append({
+                "cafe_id": cafe.cafe_id,
+                "cafe_lat": cafe.cafe_coordinates.lat,
+                "cafe_lon": cafe.cafe_coordinates.lon
+            })
 
-    return HttpResponse(json.dumps(id_of_cafes_in_circle))
+    return HttpResponse(json.dumps(cafes_in_circle_info))
 
 
 @csrf_exempt
@@ -297,9 +304,12 @@ def get_all_cafes(request):
     if request.method != "GET":
         return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
-    cafe_json = serializers.serialize("json", Cafe.objects.all())
+    cafe_queryset = Cafe.objects.all()
+    cafe_id_list = []
+    for cafe in cafe_queryset:
+        cafe_id_list.append(cafe.cafe_id)
 
-    return HttpResponse(cafe_json)
+    return HttpResponse(json.dumps(cafe_id_list))
 
 
 @csrf_exempt
