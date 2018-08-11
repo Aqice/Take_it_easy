@@ -1,5 +1,7 @@
 from django.db import models
 import django.utils.timezone
+from django.contrib.auth.models import User
+from users.models import MyUser
 
 
 class Coordinates(models.Model):
@@ -164,6 +166,10 @@ class Cafe(models.Model):
         verbose_name='Дата добавления',
         default=django.utils.timezone.now
     )
+    cafe_staff = models.ManyToManyField(
+        MyUser,
+        verbose_name='Работники кафе'
+    )
 
     def __str__(self):
         return self.cafe_name
@@ -188,33 +194,6 @@ class Cafe(models.Model):
             "add_time": str(self.add_time)
         }
         return dict_for_return
-
-
-# ToDo Убрать остюда объект клиента и создать отдельное приложение и там создать модель
-class Client(models.Model):
-    client_id = models.AutoField(
-        primary_key=True,
-        verbose_name="id клиента"
-    )
-    first_name = models.CharField(
-        verbose_name="Имя",
-        max_length=100
-    )
-    second_name = models.CharField(
-        verbose_name="Фамилия",
-        max_length=100
-    )
-    patronymic = models.CharField(
-        verbose_name="Отчество",
-        max_length=100
-    )
-    phone_number = models.CharField(
-        verbose_name="Номер телефона",
-        max_length=12
-    )
-
-    def __str__(self):
-        return str(self.second_name) + str(self.first_name)
 
 
 # ToDo Переписать, выглядит крайне погано, подумать, как лучше сделать
@@ -264,7 +243,7 @@ class WaitList(models.Model):
         verbose_name="Количество", blank=True, null=True
     )
     client = models.ForeignKey(
-        Client, on_delete=models.CASCADE, verbose_name="Клиент",
+        User, on_delete=models.CASCADE, verbose_name="Клиент",
     )
     cafe_id = models.ForeignKey(
         Cafe, verbose_name="Кафе", on_delete=models.CASCADE

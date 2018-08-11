@@ -5,7 +5,6 @@ from .models import OpeningHours
 from .models import Owner
 from .models import Item
 from .models import WaitList
-from .models import Client
 
 
 class CafeListAdmin(admin.ModelAdmin):
@@ -28,4 +27,3 @@ admin.site.register(Coordinates)
 admin.site.register(OpeningHours)
 admin.site.register(Owner)
 admin.site.register(Item)
-admin.site.register(Client)
