@@ -69,7 +69,6 @@ class CafeMedia(models.Model):
 
 
 class Item(models.Model):
-    # ToDo класс Item'a (Напиток или пирожок)
     item_id = models.AutoField(
         primary_key=True
     )
@@ -94,6 +93,10 @@ class Item(models.Model):
     )
     item_cost = models.IntegerField(
         verbose_name="Цена товара"
+    )
+    item_type = models.CharField(
+        verbose_name="Тип товара",
+        max_length=100
     )
 
     def __str__(self):
@@ -120,7 +123,7 @@ class OpeningHours(models.Model):
 
 class Cafe(models.Model):
     # ToDo сделать отдельное поле для отзывов, связать с объектом кафе и клиента
-    # ToDo сделать функцию для изменения рейтинга кафе
+    # ToDo сделать функцию для изменения рейтинга кафе(встроить в функцию добавления отзыва)
     # ToDo добавить картинки для кафе
     cafe_id = models.AutoField(
         primary_key=True,

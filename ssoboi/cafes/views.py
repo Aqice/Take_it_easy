@@ -5,76 +5,34 @@ from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
 
-from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList, Client
+from .models import Cafe, Owner, Item, WaitList, Client
 from .serializers import CafeSerializer
 
 
 @csrf_exempt
-def add_cafe(request):
+def cafes_list(request):
     """
 
-    **Функция для добавления нового кафе.**
-    POST запрос
+        Функция для получения списка всех ID
 
-    Параметры:
-        - `owner_name`: ФИО владельца
-        - `owner_phone_number`: Телефон владельца
-        - `owner_email`: Email владельца
-        - `cafe_name`: Название кафе
-        - 'cafe_description': Описание кафе
-        - 'cafe_rating': Рэйтинг кафе
-        - `opening_time`: Время открытия кафе (формат: HH:MM:SS)
-        - 'closing_time': Время закрытия кафе (формат: HH:MM:SS)
-        - 'lat': Широта кафе
-        - 'lon': Долгота кафе
+        Параметры отсутсвуют
 
-    return: `cafe_id`, если создание прошло успешно
+        Возвращает:
+          * Список ID объектов :model:`cafes.Cafe`
     """
-    if request.method != "POST":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-    try:
-        owner = Owner(
-            owner_name=request.POST["owner_name"],
-            owner_phone_number=request.POST["owner_phone_number"],
-            owner_email=request.POST["owner_email"]
-        )
-        owner.save()
-    except KeyError:
-        return HttpResponseBadRequest("Owner information is invalid.")
+    if request.method == "GET":
+        cafe_queryset = Cafe.objects.all()
+        serializer = CafeSerializer(cafe_queryset, many=True)
+        return JsonResponse(serializer.data, safe=False)
 
-    try:
-        opening_hours = OpeningHours(
-            opening_time=request.POST["opening_time"],
-            closing_time=request.POST["closing_time"]
-        )
-        opening_hours.save()
-    except KeyError:
-        return HttpResponseBadRequest("Opening hours are invalid.")
-
-    try:
-        coordinates = Coordinates(
-            lat=request.POST["lat"],
-            lon=request.POST["lon"]
-        )
-        coordinates.save()
-    except KeyError:
-        return HttpResponseBadRequest("Coordinates are invalid.")
-
-    try:
-        cafe = Cafe(
-            cafe_name=request.POST["cafe_name"],
-            cafe_description=request.POST["cafe_description"],
-            cafe_rating=request.POST["cafe_rating"],
-            cafe_coordinates=coordinates,
-            cafe_owner=owner,
-            cafe_opening_hours=opening_hours
-        )
-        cafe.save()
-    except KeyError:
-        return HttpResponseBadRequest("Cafe information is invalid.")
-
-    return HttpResponse(cafe.cafe_id)
+    if request.method == "POST":
+        serializer = CafeSerializer(data=request.POST)
+        if serializer.is_valid():
+            serializer.save()
+            return HttpResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return HttpResponseBadRequest(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
@@ -124,11 +82,13 @@ def get_cafe_by_id(request, pk):
 
 
 @csrf_exempt
-def get_cafe_by_name(request, cafe_name):
+def get_cafe_by_name(request):
     try:
-        cafes = Cafe.objects.get(cafe_name=cafe_name)
+        cafes = Cafe.objects.get(cafe_name=request.GET["cafe_name"])
     except Cafe.DoesNotExist:
         return HttpResponse(status=404)
+    except AttributeError:
+        return HttpResponseBadRequest("No cafe_name in request.")
 
     if request.method == "GET":
         if type(cafes) == Cafe:
@@ -136,29 +96,6 @@ def get_cafe_by_name(request, cafe_name):
         else:
             serializer = CafeSerializer(cafes, many=True)
         return JsonResponse(serializer.data, safe=False)
-
-
-@csrf_exempt
-def remove_cafe(request):
-    """
-
-        Функция для удаления кафе. POST запрос
-
-        Параметры:
-            - `cafe_id`: ID кафе, которое нужно удалить
-
-        return: 1, если всё прошло штатно
-        """
-    if request.method != "POST":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-
-    try:
-        cafe = Cafe.objects.get(cafe_id=request.GET["cafe_id"])
-    except:
-        return HttpResponseBadRequest("cafe_id is invalid")
-
-    cafe.delete()
-    return HttpResponse(1)
 
 
 @csrf_exempt
@@ -205,31 +142,6 @@ def get_cafe_by_coord(request):
     return HttpResponse(json.dumps(cafes_in_circle_info))
 
 
-@csrf_exempt
-def get_coord_by_id(request):
-    """
-
-        Функция для получения координат кафе по cafe_id. GET запрос
-
-        Параметры:
-          * cafe_id - ID кафе, координаты которого нужно получить
-
-        Возвращает:
-          * Объект :model:`cafes.Coordinates`
-    """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
-
-    try:
-        coordinates = Coordinates.objects.get(coordinates_id=int(request.GET["id"]))
-    except:
-        return HttpResponseBadRequest("id is invalid")
-
-    serialized_obj = serializers.serialize('json', [coordinates, ])
-
-    return HttpResponse(serialized_obj)
-
-
 def get_owner_by_id(request):
     """
 
@@ -250,31 +162,6 @@ def get_owner_by_id(request):
         return HttpResponseBadRequest("id is invalid")
 
     serialized_obj = serializers.serialize('json', [owner, ])
-
-    return HttpResponse(serialized_obj)
-
-
-@csrf_exempt
-def get_cafe_opening_hours_by_id(request):
-    """
-
-        Функция для получения времени работы кафе по cafe_id. GET запрос
-
-        Параметры:
-          * cafe_id - ID кафе, время работы которого нужно получить
-
-        Возвращает:
-         * Объект :model:`cafes.OpeningHours`
-    """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
-
-    try:
-        cafe_opening_hours = OpeningHours.objects.get(opening_hours_id=int(request.GET["id"]))
-    except:
-        return HttpResponseBadRequest("id is invalid")
-
-    serialized_obj = serializers.serialize('json', [cafe_opening_hours, ])
 
     return HttpResponse(serialized_obj)
 
@@ -304,23 +191,6 @@ def get_item_by_id(request):
     serialized_obj = serializers.serialize('json', [item, ])
 
     return HttpResponse(serialized_obj)
-
-
-@csrf_exempt
-def get_all_cafes(request):
-    """
-
-        Функция для получения списка всех ID
-
-        Параметры отсутсвуют
-
-        Возвращает:
-          * Список ID объектов :model:`cafes.Cafe`
-    """
-    if request.method == "GET":
-        cafe_queryset = Cafe.objects.all()
-        serializer = CafeSerializer(cafe_queryset, many=True)
-        return JsonResponse(serializer.data, safe=False)
 
 
 @csrf_exempt
@@ -502,88 +372,3 @@ def get_all_wait_lists_by_cafe_id(request):
     serialized_obj = serializers.serialize('json', [wait_list, ])
 
     return HttpResponse(serialized_obj)
-
-
-@csrf_exempt
-def change_wait_list_paid_status(request):
-    """
-
-        Функция для изменения статуса done у объекта WaitList по `wait_list_id`
-
-        Параметры:
-            - `wait_list_id`: ID WaitList, статус которого нужно изменить
-
-        return: Новый статус объекта WaitList, если всё прошло штатно
-    """
-    if request.method != "POST":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-
-    try:
-        wait_list = WaitList.objects.get(
-            order_id=request.POST["wait_list_id"]
-        )
-    except KeyError:
-        return HttpResponseBadRequest("No wait_list_id in request")
-    except ObjectDoesNotExist:
-        return HttpResponseBadRequest("No WaitList object with this ID")
-    if wait_list.done:
-        return HttpResponseBadRequest("WaitList object done status already is True")
-
-    wait_list.done = True
-    wait_list.save()
-    return HttpResponse(wait_list.done)
-
-
-@csrf_exempt
-def add_new_client(request):
-    """
-
-       Функция для добавления нового клиента. POST запрос
-
-       Параметры:
-           - `client_id`: id клиента(id чата в телеграме)
-           - `first_name`: Имя
-           - `second_name`: Фамилия
-           - `patronymic`: Отчество
-           - 'phone_number': Номер телефона клиента
-        Возвращает:
-            ID созданнаго клиентау
-       """
-    if request.method != "POST":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-    try:
-        client = Client(
-            client_id=request.POST["client_id"],
-            first_name=request.POST["first_name"],
-            second_name=request.POST["second_name"],
-            patronymic=request.POST["patronymic"],
-            phone_number=request.POST["phone_number"]
-        )
-
-    except KeyError as e:
-        return HttpResponseBadRequest("No " + e.args[0][1:-1] + " in request")
-
-    client.save()
-    return HttpResponse(client.client_id)
-
-
-@csrf_exempt
-def check_user_in_database(request):
-    """
-
-       Функция для регестрации пользователя. GET запрос
-
-       Параметры:
-           - `client_id`: id клиента(id чата в телеграме)
-       Возвращает:
-           True -- клиент зарегестрирован,
-           False -- клиент не зарегестрирован
-       """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-    try:
-        client_id = request.GET["client_id"]
-    except KeyError:
-        return HttpResponseBadRequest("No client_id in request")
-
-    return HttpResponse(Client.objects.filter(client_id=client_id).exists())
