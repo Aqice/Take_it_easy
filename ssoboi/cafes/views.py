@@ -3,10 +3,11 @@ from json import JSONDecodeError
 
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList, Client
+from .serializers import CafeSerializer
 
 
 @csrf_exempt
@@ -77,7 +78,7 @@ def add_cafe(request):
 
 
 @csrf_exempt
-def get_cafe_by_id(request):
+def get_cafe_by_id(request, pk):
     """
 
     Функция для получение информации о кафе. GET запрос
@@ -112,14 +113,29 @@ def get_cafe_by_id(request):
 
 
     """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
     try:
-        cafe = Cafe.objects.get(cafe_id=request.GET["cafe_id"])
-    except:
-        return HttpResponseBadRequest("cafe_id is invalid")
+        cafe = Cafe.objects.get(pk=pk)
+    except Cafe.DoesNotExist:
+        return HttpResponse(status=404)
 
-    return HttpResponse(json.dumps(cafe.to_dict()))
+    if request.method == 'GET':
+        serializer = CafeSerializer(cafe)
+        return JsonResponse(serializer.data)
+
+
+@csrf_exempt
+def get_cafe_by_name(request, cafe_name):
+    try:
+        cafes = Cafe.objects.get(cafe_name=cafe_name)
+    except Cafe.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == "GET":
+        if type(cafes) == Cafe:
+            serializer = CafeSerializer(cafes)
+        else:
+            serializer = CafeSerializer(cafes, many=True)
+        return JsonResponse(serializer.data, safe=False)
 
 
 @csrf_exempt
@@ -301,15 +317,10 @@ def get_all_cafes(request):
         Возвращает:
           * Список ID объектов :model:`cafes.Cafe`
     """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
-
-    cafe_queryset = Cafe.objects.all()
-    cafe_id_list = []
-    for cafe in cafe_queryset:
-        cafe_id_list.append(cafe.cafe_id)
-
-    return HttpResponse(json.dumps(cafe_id_list))
+    if request.method == "GET":
+        cafe_queryset = Cafe.objects.all()
+        serializer = CafeSerializer(cafe_queryset, many=True)
+        return JsonResponse(serializer.data, safe=False)
 
 
 @csrf_exempt
