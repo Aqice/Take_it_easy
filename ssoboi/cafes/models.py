@@ -69,6 +69,7 @@ class CafeMedia(models.Model):
 
 
 class Item(models.Model):
+    # ToDo класс Item'a (Напиток или пирожок)
     item_id = models.AutoField(
         primary_key=True
     )
@@ -119,6 +120,8 @@ class OpeningHours(models.Model):
 
 class Cafe(models.Model):
     # ToDo сделать отдельное поле для отзывов, связать с объектом кафе и клиента
+    # ToDo сделать функцию для изменения рейтинга кафе
+    # ToDo добавить картинки для кафе
     cafe_id = models.AutoField(
         primary_key=True,
         verbose_name="ID кафе",
