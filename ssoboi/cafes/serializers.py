@@ -31,6 +31,7 @@ class ItemSerializer(serializers.ModelSerializer):
             "item_icon",
             "item_image",
             "item_cost",
+            "item_type"
         )
 
 

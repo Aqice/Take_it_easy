@@ -1,7 +1,6 @@
 from django.db import models
 import django.utils.timezone
 from django.contrib.auth.models import User
-from users.models import MyUser
 
 
 class Coordinates(models.Model):

@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Cafe, Coordinates, Owner, OpeningHours, Item, WaitList, Client
+from .models import Cafe, Owner, Item, WaitList
 from .serializers import CafeSerializer
 
 
@@ -307,7 +307,7 @@ def get_item_by_id(request):
 
 
 @csrf_exempt
-def get_all_cafes(request):
+def cafes_list(request):
     """
 
         Функция для получения списка всех ID
