@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Cafe, Owner, Item, WaitList
 from .serializers import CafeSerializer
-from users.models import MyUser
+from users.models import User
 
 @csrf_exempt
 def add_cafe(request):
@@ -332,7 +332,7 @@ def create_new_wait_list(request):
         Параметры:
             - блюда (`items`) массив в json
             - количества каждого блюда (`amounts`) массив в json
-            - id клиента (`MyUser_id`)
+            - id клиента (`User_id`)
             - id кафе (`cafe_id`)
             - время, к которому необходимо приготовить заказ (`time_to_take`) в формате xx.yy.zz
 
@@ -362,9 +362,9 @@ def create_new_wait_list(request):
         return HttpResponseBadRequest("Length of amounts and items are not the same")
 
     try:
-        MyUser_id = request.POST["MyUser_id"]
+        User_id = request.POST["User_id"]
     except KeyError:
-        return HttpResponseBadRequest("No MyUser_id in request")
+        return HttpResponseBadRequest("No User_id in request")
     except ObjectDoesNotExist:
         return HttpResponseBadRequest("No object with your id")
 
@@ -385,7 +385,7 @@ def create_new_wait_list(request):
         wait_list = WaitList(
             item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
+            User=User.objects.get(User_id=User_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -397,7 +397,7 @@ def create_new_wait_list(request):
             amount_1=amounts[0],
             item_2=Item.objects.get(item_id=items[1]),
             amount_2=amounts[1],
-            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
+            User=User.objects.get(User_id=User_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -411,7 +411,7 @@ def create_new_wait_list(request):
             amount_2=amounts[1],
             item_3=Item.objects.get(item_id=items[2]),
             amount_3=amounts[2],
-            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
+            User=User.objects.get(User_id=User_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -427,7 +427,7 @@ def create_new_wait_list(request):
             amount_3=amounts[2],
             item_4=Item.objects.get(item_id=items[3]),
             amount_4=amounts[3],
-            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
+            User=User.objects.get(User_id=User_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -445,7 +445,7 @@ def create_new_wait_list(request):
             amount_4=amounts[3],
             item_5=Item.objects.get(item_id=items[4]),
             amount_5=amounts[4],
-            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
+            User=User.objects.get(User_id=User_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -465,7 +465,7 @@ def create_new_wait_list(request):
             amount_5=amounts[4],
             item_6=Item.objects.get(item_id=items[5]),
             amount_6=amounts[5],
-            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
+            User=User.objects.get(User_id=User_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,

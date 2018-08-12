@@ -1,7 +1,7 @@
 from django.db import models
 import django.utils.timezone
 from django.contrib.auth.models import User
-from users.models import MyUser
+from users.models import User
 
 
 class Coordinates(models.Model):
@@ -167,7 +167,7 @@ class Cafe(models.Model):
         default=django.utils.timezone.now
     )
     cafe_staff = models.ManyToManyField(
-        MyUser,
+        User,
         verbose_name='Работники кафе'
     )
 

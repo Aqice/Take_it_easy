@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group, User
 # Create your models here.
 
 
-class MyUser(User):
+class User(User):
     phone_number = models.CharField(max_length=12, unique=True)
 
     def __str__(self):
@@ -12,7 +12,7 @@ class MyUser(User):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, isStaff=False):
+    def create_user(self, email, password=None, is_staff=False):
         """
         Creates, saves and adds to special group a User with the given email and password.
         """
@@ -24,7 +24,7 @@ class UserManager(BaseUserManager):
         )
 
         user.set_password(password)
-        if isStaff:
+        if is_staff:
             group = Group.objects.get(name='staff')
         else:
             group = Group.objects.get(name='users')
