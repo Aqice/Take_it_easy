@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Cafe, Owner, Item, WaitList
 from .serializers import CafeSerializer
-
+from users.models import MyUser
 
 @csrf_exempt
 def add_cafe(request):
@@ -332,7 +332,7 @@ def create_new_wait_list(request):
         Параметры:
             - блюда (`items`) массив в json
             - количества каждого блюда (`amounts`) массив в json
-            - id клиента (`client_id`)
+            - id клиента (`MyUser_id`)
             - id кафе (`cafe_id`)
             - время, к которому необходимо приготовить заказ (`time_to_take`) в формате xx.yy.zz
 
@@ -362,9 +362,9 @@ def create_new_wait_list(request):
         return HttpResponseBadRequest("Length of amounts and items are not the same")
 
     try:
-        client_id = request.POST["client_id"]
+        MyUser_id = request.POST["MyUser_id"]
     except KeyError:
-        return HttpResponseBadRequest("No client_id in request")
+        return HttpResponseBadRequest("No MyUser_id in request")
     except ObjectDoesNotExist:
         return HttpResponseBadRequest("No object with your id")
 
@@ -385,7 +385,7 @@ def create_new_wait_list(request):
         wait_list = WaitList(
             item_1=Item.objects.get(item_id=items[0]),
             amount_1=amounts[0],
-            client=Client.objects.get(client_id=client_id),
+            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -397,7 +397,7 @@ def create_new_wait_list(request):
             amount_1=amounts[0],
             item_2=Item.objects.get(item_id=items[1]),
             amount_2=amounts[1],
-            client=Client.objects.get(client_id=client_id),
+            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -411,7 +411,7 @@ def create_new_wait_list(request):
             amount_2=amounts[1],
             item_3=Item.objects.get(item_id=items[2]),
             amount_3=amounts[2],
-            client=Client.objects.get(client_id=client_id),
+            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -427,7 +427,7 @@ def create_new_wait_list(request):
             amount_3=amounts[2],
             item_4=Item.objects.get(item_id=items[3]),
             amount_4=amounts[3],
-            client=Client.objects.get(client_id=client_id),
+            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -445,7 +445,7 @@ def create_new_wait_list(request):
             amount_4=amounts[3],
             item_5=Item.objects.get(item_id=items[4]),
             amount_5=amounts[4],
-            client=Client.objects.get(client_id=client_id),
+            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -465,7 +465,7 @@ def create_new_wait_list(request):
             amount_5=amounts[4],
             item_6=Item.objects.get(item_id=items[5]),
             amount_6=amounts[5],
-            client=Client.objects.get(client_id=client_id),
+            myuser=MyUser.objects.get(MyUser_id=MyUser_id),
             cafe_id=Cafe.objects.get(cafe_id=cafe_id),
             time_to_take=time_to_take,
             paid=False,
@@ -532,58 +532,3 @@ def change_wait_list_paid_status(request):
     wait_list.done = True
     wait_list.save()
     return HttpResponse(wait_list.done)
-
-
-@csrf_exempt
-def add_new_client(request):
-    """
-
-       Функция для добавления нового клиента. POST запрос
-
-       Параметры:
-           - `client_id`: id клиента(id чата в телеграме)
-           - `first_name`: Имя
-           - `second_name`: Фамилия
-           - `patronymic`: Отчество
-           - 'phone_number': Номер телефона клиента
-        Возвращает:
-            ID созданнаго клиентау
-       """
-    if request.method != "POST":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-    try:
-        client = Client(
-            client_id=request.POST["client_id"],
-            first_name=request.POST["first_name"],
-            second_name=request.POST["second_name"],
-            patronymic=request.POST["patronymic"],
-            phone_number=request.POST["phone_number"]
-        )
-
-    except KeyError as e:
-        return HttpResponseBadRequest("No " + e.args[0][1:-1] + " in request")
-
-    client.save()
-    return HttpResponse(client.client_id)
-
-
-@csrf_exempt
-def check_user_in_database(request):
-    """
-
-       Функция для регестрации пользователя. GET запрос
-
-       Параметры:
-           - `client_id`: id клиента(id чата в телеграме)
-       Возвращает:
-           True -- клиент зарегестрирован,
-           False -- клиент не зарегестрирован
-       """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-    try:
-        client_id = request.GET["client_id"]
-    except KeyError:
-        return HttpResponseBadRequest("No client_id in request")
-
-    return HttpResponse(Client.objects.filter(client_id=client_id).exists())

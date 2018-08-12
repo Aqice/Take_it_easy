@@ -1,6 +1,6 @@
 from django.db import models
 import django.utils.timezone
-from django.contrib.auth.models import User
+from users.models import MyUser
 
 
 class Coordinates(models.Model):
@@ -242,7 +242,7 @@ class WaitList(models.Model):
         verbose_name="Количество", blank=True, null=True
     )
     client = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Клиент",
+        MyUser, on_delete=models.CASCADE, verbose_name="Клиент",
     )
     cafe_id = models.ForeignKey(
         Cafe, verbose_name="Кафе", on_delete=models.CASCADE
