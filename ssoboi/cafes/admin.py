@@ -6,6 +6,7 @@ from .models import Owner
 from .models import Item
 from .models import WaitList
 from .models import User
+from .models import Feedback
 from django.contrib.auth.admin import UserAdmin
 
 
@@ -14,7 +15,7 @@ class CafeListAdmin(admin.ModelAdmin):
     list_display_links = ['add_time', '__str__']
     list_filter = ['add_time']
     search_fields = ['cafe_name']
-    filter_horizontal = ['cafe_menu', 'cafe_staff']
+    filter_horizontal = ['cafe_menu', 'cafe_staff', 'cafe_feedback']
 
 
 class WaitListAdmin(admin.ModelAdmin):
@@ -22,9 +23,12 @@ class WaitListAdmin(admin.ModelAdmin):
     list_display_links = ['time_to_take', '__str__', 'cafe_id']
     list_filter = ['time_to_take', 'order_id']
 
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ['__str__']
 
 admin.site.register(WaitList, WaitListAdmin)
 admin.site.register(Cafe, CafeListAdmin)
+admin.site.register(Feedback, FeedbackAdmin)
 admin.site.register(Coordinates)
 admin.site.register(OpeningHours)
 admin.site.register(Owner)

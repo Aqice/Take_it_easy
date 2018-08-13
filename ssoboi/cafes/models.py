@@ -117,7 +117,7 @@ class Feedback(models.Model):
         verbose_name="Автор отзыва",
         on_delete=models.CASCADE
     )
-    desc = models.CharField(
+    desc = models.TextField(
         verbose_name="Отзыв",
         max_length=3500
     )
@@ -134,7 +134,6 @@ class Feedback(models.Model):
 
 
 class Cafe(models.Model):
-    # ToDo сделать отдельное поле для отзывов, связать с объектом кафе и клиента
     # ToDo сделать функцию для изменения рейтинга кафе(встроить в функцию добавления отзыва)
     # ToDo добавить картинки для кафе
     cafe_id = models.AutoField(
@@ -193,8 +192,6 @@ class Cafe(models.Model):
         verbose_name="Отзывы о кафе",
         blank=True
     )
-
-
 
     def __str__(self):
         return self.cafe_name
