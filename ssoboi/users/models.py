@@ -1,36 +1,42 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager
-from django.contrib.auth.models import Group, User
 from phonenumber_field.modelfields import PhoneNumberField
+from datetime import date
+from django.db import models
+from django.contrib.auth.models import PermissionsMixin, AbstractUser
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.utils.translation import ugettext_lazy as _
+from .manager import UserManager
 
 
-class User(User):
-    phone_number = PhoneNumberField()
+class User(AbstractBaseUser, PermissionsMixin):
+    username = models.CharField(_('username'), max_length=130, unique=True)
+    full_name = models.CharField(_('full name'), max_length=130, blank=True)
+    is_staff = models.BooleanField(_('is_staff'), default=False)
+    is_active = models.BooleanField(_('is_active'), default=True)
+    date_joined = models.DateField(_("date_joined"), default=date.today)
+    phone_number_verified = models.BooleanField(default=False)
+    change_pw = models.BooleanField(default=True)
+    phone_number = models.BigIntegerField(unique=True)
+    country_code = models.IntegerField()
+    two_factor_auth = models.BooleanField(default=False)
 
-    def __str__(self):
-        return str(self.first_name + self.last_name)
+    objects = UserManager()
 
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['full_name', 'phone_number', 'country_code']
 
-class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, is_staff=False):
+    class Meta:
+        ordering = ('username',)
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
+
+    def get_short_name(self):
         """
-        Creates, saves and adds to special group a User with the given email and password.
+        Returns the display name.
+        If full name is present then return full name as display name
+        else return username.
         """
-        if not email:
-            raise ValueError('Users must have an email address')
-
-        user = self.model(
-            email=self.normalize_email(email),
-        )
-
-        user.set_password(password)
-        if is_staff:
-            group = Group.objects.get(name='staff')
+        if self.full_name != '':
+            return self.full_name
         else:
-            group = Group.objects.get(name='users')
-        group.user_set.add(user)
-        user.save(using=self._db)
-        group.save(using=self._db)
-        return user
-
-
+            return self.username
