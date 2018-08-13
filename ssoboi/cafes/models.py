@@ -55,48 +55,33 @@ class Owner(models.Model):
         }
 
 
-class CafeMedia(models.Model):
-    media_id = models.AutoField(
-        primary_key=True,
-    )
-    icon = models.ImageField(
-        verbose_name="Иконка кафе"
-    )
-    photos = models.ImageField(
-        verbose_name="Картинки кафе"
-    )
-    cafe_id = models.IntegerField(
-        verbose_name="ID кафе"
-    )
-
-
 class Item(models.Model):
     item_id = models.AutoField(
         primary_key=True
     )
-    item_name = models.CharField(
+    name = models.CharField(
         verbose_name="Название элемента",
         max_length=1000,
     )
-    item_description = models.TextField(
+    description = models.TextField(
         verbose_name="Описание элемента"
     )
-    item_time = models.IntegerField(
+    time = models.IntegerField(
         verbose_name="Время приготовления (в минутах)",
         default=10
     )
-    item_icon = models.ImageField(
+    icon = models.ImageField(
         verbose_name="Иконка элемента",
         blank=True
     )
-    item_image = models.ImageField(
+    image = models.ImageField(
         verbose_name="Фото элемента",
         blank=True
     )
-    item_cost = models.IntegerField(
+    price = models.IntegerField(
         verbose_name="Цена товара"
     )
-    item_type = models.CharField(
+    type = models.CharField(
         verbose_name="Тип товара",
         max_length=100
     )
@@ -121,6 +106,31 @@ class OpeningHours(models.Model):
 
     def get_opening_hours(self):
         return [str(self.opening_time), str(self.closing_time)]
+
+
+class Feedback(models.Model):
+    feedback_id = models.AutoField(
+        primary_key=True
+    )
+    author = models.OneToOneField(
+        User,
+        verbose_name="Автор отзыва",
+        on_delete=models.CASCADE
+    )
+    desc = models.CharField(
+        verbose_name="Отзыв",
+        max_length=3500
+    )
+    rating = models.FloatField(
+        verbose_name="Рейтинг отзыва",
+    )
+    add_time = models.DateTimeField(
+        verbose_name="Дата добавления",
+        default=django.utils.timezone.now
+    )
+
+    def __str__(self):
+        return "feedback by", str(self.author), "(" + str(self.add_time) + ")"
 
 
 class Cafe(models.Model):
@@ -170,6 +180,21 @@ class Cafe(models.Model):
         User,
         verbose_name='Работники кафе'
     )
+    icon = models.ImageField(
+        # Иконка кафе (типа как буква М у макдака), если кафе не имеет такого логотипа,
+        # то поставим какой-нибудь стандартный
+        verbose_name="Иконка кафе",
+        default=None
+        # ToDo организация нескольких картинок кафе (manyToMany, либо как-то еще)
+        # Смысла делать отдельно класс cafeMedia пока не вижу
+    )
+    cafe_feedback = models.ManyToManyField(
+        Feedback,
+        verbose_name="Отзывы о кафе",
+        blank=True
+    )
+
+
 
     def __str__(self):
         return self.cafe_name

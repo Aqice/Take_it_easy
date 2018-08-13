@@ -1,11 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import Group, User
-# Create your models here.
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class User(User):
-    phone_number = models.CharField(max_length=12, unique=True)
+    phone_number = PhoneNumberField()
 
     def __str__(self):
         return str(self.first_name + self.last_name)
