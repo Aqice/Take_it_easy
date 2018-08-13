@@ -45,8 +45,8 @@ class OpeningHoursSerializer(serializers.ModelSerializer):
 
 
 class CafeSerializer(serializers.ModelSerializer):
-    cafe_coordinates = CoordinatesSerializer()
     cafe_owner = OwnerSerializer
+    cafe_coordinates = CoordinatesSerializer
     cafe_menu = ItemSerializer(many=True)
 
     class Meta:
