@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
 
+
 urlpatterns = [
     url(r'admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
