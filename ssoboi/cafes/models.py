@@ -87,7 +87,7 @@ class Item(models.Model):
     )
 
     def __str__(self):
-        return str(self.item_name) + ' - ' + str(self.item_description)
+        return str(self.name) + ' - ' + str(self.description)
 
 
 class OpeningHours(models.Model):

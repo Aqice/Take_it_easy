@@ -3,12 +3,11 @@ from json import JSONDecodeError
 
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, Http404
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 
+from .models import Cafe, Owner, Item, WaitList
+from .serializers import CafeSerializer
 from .models import Cafe, Owner, Item, WaitList
 from .serializers import CafeSerializer
 from users.models import User
@@ -81,49 +80,41 @@ def add_cafe(request):
     return HttpResponse(cafe.cafe_id)
 
 
-class CafeDetail(APIView):
-    def get_object(self, pk):
-        try:
-            return Cafe.objects.get(pk=pk)
-        except Cafe.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        """
-
-        Функция для получение информации о кафе. GET запрос
-
-        Параметры:
-          * cafe_id - ID кафе, информацию которого нужно получить
-
-        Возвращаемый словарь:
-          * cafe_id - ID кафе
-          * cafe_name - Название кафе
-          * cafe_description - Описание кафе
-          * cafe_rating - Рэйтинг кафе
-          * lat - Координата широты кафе
-          * lon - Координата долготы кафе
-          * cafe_owner - Владелец кафе объект типа :model:`cafes.Owner`, пердставляет словарь с полями:\n
-            * owner_id - ID владельца кафе
-            * owner_name - Имя владельца кафе
-            * owner_phone_number - Номер телефона владельца кафе
-            * owner_email - Почта владельца кафе
-          * cafe_menu - Мень кафе, список объектов типа :model:`cafes.Item`, где каждый элемент списка словарь с полями:\n
-            * item_id - ID продукта
-            * item_name - Название продукта
-            * item_description - Описание продукта
-            * item_time - Время приготовления продукта
-            * item_icon - Иконка продукта
-            * item_image - Фотография продукта
-            * item_cost - Цена продукта
-          * cafe_opening_hours - Лист \n
-            * нулевой элемент - время открытия кафе
-            * первый элемент - время закрытия кафе
-          * add_time - Время добавления кафе в систему
-
-
-        """
-        cafe = self.get_object(pk)
+@csrf_exempt
+def get_cafe_by_id(request, pk):
+    """
+    Функция для получение информации о кафе. GET запрос
+    Параметры:
+      * cafe_id - ID кафе, информацию которого нужно получить
+    Возвращаемый словарь:
+      * cafe_id - ID кафе
+      * cafe_name - Название кафе
+      * cafe_description - Описание кафе
+      * cafe_rating - Рэйтинг кафе
+      * lat - Координата широты кафе
+      * lon - Координата долготы кафе
+      * cafe_owner - Владелец кафе объект типа :model:`cafes.Owner`, пердставляет словарь с полями:\n
+        * owner_id - ID владельца кафе
+        * owner_name - Имя владельца кафе
+        * owner_phone_number - Номер телефона владельца кафе
+        * owner_email - Почта владельца кафе
+      * cafe_menu - Мень кафе, список объектов типа :model:`cafes.Item`, где каждый элемент списка словарь с полями:\n
+        * item_id - ID продукта
+        * item_name - Название продукта
+        * item_description - Описание продукта
+        * item_time - Время приготовления продукта
+        * item_icon - Иконка продукта
+        * item_image - Фотография продукта
+        * item_cost - Цена продукта
+      * cafe_opening_hours - Лист \n
+        * нулевой элемент - время открытия кафе
+        * первый элемент - время закрытия кафе
+      * add_time - Время добавления кафе в систему
+    """
+    try:
+        cafe = Cafe.objects.get(pk=pk)
+    except Cafe.DoesNotExist:
+        return HttpResponse(status=404)
 
         serializer = CafeSerializer(cafe)
         return JsonResponse(serializer.data)
@@ -171,18 +162,15 @@ def remove_cafe(request):
 def get_cafe_by_coord(request):
     """
     Функция для получения информации ID ближайших кафе по координатам. GET запрос
-
     Параметры:
       * lat - широта
       * lon - долгота
       * r - радиус
-
     Возвращает:
       * список словарей, в каждом из которых есть следующие ключи\n
         * cafe_id - ID объекта :model:`cafes.Cafe`
         * cafe_lat - Координата широты кафе
         * cafe_lon - Координата долготы кафе
-
     Для получения полной информации о кафе нужно воспользоваться функцией :view:`cafes.views.get_cafe_by_id`
     """
     if request.method != "GET":
@@ -214,12 +202,9 @@ def get_cafe_by_coord(request):
 @csrf_exempt
 def get_coord_by_id(request):
     """
-
         Функция для получения координат кафе по cafe_id. GET запрос
-
         Параметры:
           * cafe_id - ID кафе, координаты которого нужно получить
-
         Возвращает:
           * Объект :model:`cafes.Coordinates`
     """
@@ -238,12 +223,9 @@ def get_coord_by_id(request):
 
 def get_owner_by_id(request):
     """
-
         Функция для получения владельца кафе по cafe_id. GET запрос
-
         Параметры:
           * cafe_id - ID кафе, владельца которого нужно получить
-
         Возвращает:
           * Объект :model:`cafes.Owner`
     """
@@ -263,12 +245,9 @@ def get_owner_by_id(request):
 @csrf_exempt
 def get_cafe_opening_hours_by_id(request):
     """
-
         Функция для получения времени работы кафе по cafe_id. GET запрос
-
         Параметры:
           * cafe_id - ID кафе, время работы которого нужно получить
-
         Возвращает:
          * Объект :model:`cafes.OpeningHours`
     """
@@ -288,7 +267,6 @@ def get_cafe_opening_hours_by_id(request):
 @csrf_exempt
 def get_item_by_id(request):
     """
-
         Функция для получения продукта по его ID. GET запрос
 
         Параметры:
@@ -312,36 +290,30 @@ def get_item_by_id(request):
     return HttpResponse(serialized_obj)
 
 
-class CafesList(APIView):
-    def get(self, request):
-        """
-
-            Функция для получения списка всех ID
-
-            Параметры отсутсвуют
-
-            Возвращает:
-              * Список ID объектов :model:`cafes.Cafe`
-        """
-        if request.method == "GET":
-            cafe_queryset = Cafe.objects.all()
-            serializer = CafeSerializer(cafe_queryset, many=True)
-            return JsonResponse(serializer.data, safe=False)
+@csrf_exempt
+def cafes_list(request):
+    """
+        Функция для получения списка всех ID
+        Параметры отсутсвуют
+        Возвращает:
+          * Список ID объектов :model:`cafes.Cafe`
+    """
+    if request.method == "GET":
+        cafe_queryset = Cafe.objects.all()
+        serializer = CafeSerializer(cafe_queryset, many=True)
+        return JsonResponse(serializer.data, safe=False)
 
 
 @csrf_exempt
 def create_new_wait_list(request):
     """
-
         Функция для создания нового списка ожидания для кафе
-
         Параметры:
             - блюда (`items`) массив в json
             - количества каждого блюда (`amounts`) массив в json
             - id клиента (`User_id`)
             - id кафе (`cafe_id`)
             - время, к которому необходимо приготовить заказ (`time_to_take`) в формате xx.yy.zz
-
         return: номер заказа (`order_id`), если все прошло штатно
     """
     if request.method != "POST":
@@ -481,33 +453,6 @@ def create_new_wait_list(request):
     wait_list.save()
 
     return HttpResponse(wait_list.order_id)
-
-
-@csrf_exempt
-def get_all_wait_lists_by_cafe_id(request):
-    """
-
-        Функция для получения списка заказов по `cafe_id`
-
-        Параметры:
-            - `cafe_id`: ID кафе, список заказов которого нужно получить
-
-        return: список из заказов (`WaitList`), если все прошло штатно
-    """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
-    try:
-        wait_list = WaitList.objects.get(
-            cafe_id=request.GET["cafe_id"],
-            done=False
-        )
-    except KeyError:
-        return HttpResponseBadRequest("No id in request")
-    except ObjectDoesNotExist:
-        return HttpResponseBadRequest("No object with your id")
-    serialized_obj = serializers.serialize('json', [wait_list, ])
-
-    return HttpResponse(serialized_obj)
 
 
 @csrf_exempt
