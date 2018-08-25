@@ -4,6 +4,7 @@ from json import JSONDecodeError
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Cafe, Owner, Item, WaitList
@@ -124,11 +125,13 @@ def get_cafe_by_id(request, pk):
 
 
 @csrf_exempt
-def get_cafe_by_name(request, cafe_name):
+def get_cafe_by_name(request):
     try:
-        cafes = Cafe.objects.get(cafe_name=cafe_name)
+        cafes = Cafe.objects.get(cafe_name=request.GET["cafe_name"])
     except Cafe.DoesNotExist:
         return HttpResponse(status=404)
+    except MultiValueDictKeyError:
+        return HttpResponse(status=400)
 
     if request.method == "GET":
         if type(cafes) == Cafe:
@@ -192,17 +195,14 @@ def get_cafe_by_coord(request):
     r2 = r ** 2
 
     all_cafes = Cafe.objects.all()
-    cafes_in_circle_info = []
-
+    cafes = []
     for cafe in all_cafes:
         if (cafe.cafe_coordinates.lat - lat) ** 2 + (cafe.cafe_coordinates.lon - lon) ** 2 <= r2:
-            cafes_in_circle_info.append({
-                "cafe_id": cafe.cafe_id,
-                "cafe_lat": cafe.cafe_coordinates.lat,
-                "cafe_lon": cafe.cafe_coordinates.lon
-            })
+            cafes.append(cafe)
 
-    return HttpResponse(json.dumps(cafes_in_circle_info))
+    serializer = CafeSerializer(cafes, many=True)
+
+    return JsonResponse(serializer.data, safe=False)
 
 
 @csrf_exempt
