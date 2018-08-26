@@ -128,11 +128,18 @@ def get_cafe_by_coord(request):
     cafes = []
     for cafe in all_cafes:
         if (cafe.cafe_coordinates.lat - lat) ** 2 + (cafe.cafe_coordinates.lon - lon) ** 2 <= r2:
-            cafes.append(cafe)
+            cafes.append(
+                {
+                    "icon": cafe.icon.path,
+                    "cafe_name": cafe.cafe_name,
+                    "lat": cafe.cafe_coordinates.lat,
+                    "lon": cafe.cafe_coordinates.lon,
+                    "cafe_description": cafe.cafe_description
 
-    serializer = CafeSerializer(cafes, many=True)
+                }
+            )
 
-    return JsonResponse(serializer.data, safe=False)
+    return JsonResponse(cafes, safe=False)
 
 
 @csrf_exempt
