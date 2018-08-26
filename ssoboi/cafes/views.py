@@ -9,7 +9,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework.response import Response
-
 from .models import Cafe, Owner, Item, WaitList
 from .serializers import CafeSerializer
 from users.models import User
@@ -67,7 +66,6 @@ class CafeDetail(APIView):
 
 
            """
-        print(pk)
         try:
             snippet = self.get_object(pk)
         except Http404:
@@ -134,8 +132,8 @@ def get_cafe_by_coord(request):
                     "cafe_name": cafe.cafe_name,
                     "lat": cafe.cafe_coordinates.lat,
                     "lon": cafe.cafe_coordinates.lon,
-                    "cafe_description": cafe.cafe_description
-
+                    "cafe_description": cafe.cafe_description,
+                    "cafe_id": cafe.cafe_id
                 }
             )
 
