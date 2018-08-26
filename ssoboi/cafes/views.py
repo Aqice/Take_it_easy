@@ -130,7 +130,7 @@ def get_cafe_by_coord(request):
         if (cafe.cafe_coordinates.lat - lat) ** 2 + (cafe.cafe_coordinates.lon - lon) ** 2 <= r2:
             cafes.append(
                 {
-                    "icon": cafe.icon.path,
+                    "icon": cafe.icon.url,
                     "cafe_name": cafe.cafe_name,
                     "lat": cafe.cafe_coordinates.lat,
                     "lon": cafe.cafe_coordinates.lon,
