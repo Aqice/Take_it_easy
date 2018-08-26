@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cafe, Coordinates, Owner, Item, OpeningHours
+from .models import Cafe, Coordinates, Owner, Item, OpeningHours, Feedback
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):
@@ -25,13 +25,13 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = (
-            "item_name",
-            "item_description",
-            "item_time",
-            "item_icon",
-            "item_image",
-            "item_cost",
-            "item_type"
+            "name",
+            "description",
+            "time",
+            "icon",
+            "image",
+            "price",
+            "type"
         )
 
 
@@ -41,6 +41,17 @@ class OpeningHoursSerializer(serializers.ModelSerializer):
         fields = (
             "opening_time",
             "closing_time"
+        )
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = (
+            "author",
+            "desc",
+            "rating",
+            "add_time"
         )
 
 
@@ -60,5 +71,7 @@ class CafeSerializer(serializers.ModelSerializer):
             "cafe_owner",
             "cafe_menu",
             "cafe_opening_hours",
-            "add_time"
+            "add_time",
+            "icon",
+            "cafe_feedback"
         )

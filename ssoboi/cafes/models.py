@@ -130,7 +130,7 @@ class Feedback(models.Model):
     )
 
     def __str__(self):
-        return "feedback by", str(self.author), "(" + str(self.add_time) + ")"
+        return "feedback by ", str(self.author), "(" + str(self.add_time) + ")"
 
 
 class Cafe(models.Model):
