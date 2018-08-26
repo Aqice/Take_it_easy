@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework.response import Response
+
 from .models import Cafe, Owner, Item, WaitList
 from .serializers import CafeSerializer
 from users.models import User
