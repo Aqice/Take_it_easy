@@ -15,6 +15,7 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = (
+            "item_id",
             "name",
             "description",
             "time",
@@ -38,6 +39,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = (
+            "feedback_id",
             "author",
             "desc",
             "rating",
