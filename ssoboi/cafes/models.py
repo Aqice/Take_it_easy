@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 import django.utils.timezone
 from django.contrib.auth.models import User
@@ -25,34 +26,6 @@ class Coordinates(models.Model):
 
     def get_lon(self):
         return self.lon
-
-
-class Owner(models.Model):
-    owner_id = models.AutoField(
-        primary_key=True,
-        verbose_name="ID владельца",
-    )
-    owner_name = models.CharField(
-        verbose_name="ФИО владельца",
-        max_length=1000,
-    )
-    owner_phone_number = models.TextField(
-        verbose_name="Телефон владельца",
-    )
-    owner_email = models.TextField(
-        verbose_name="Email владельца",
-    )
-
-    def __str__(self):
-        return self.owner_name
-
-    def to_dict(self):
-        return {
-            "owner_id": self.owner_id,
-            "owner_name": self.owner_name,
-            "owner_phone_number": self.owner_phone_number,
-            "owner_email": self.owner_email
-        }
 
 
 class Item(models.Model):
@@ -133,6 +106,32 @@ class Feedback(models.Model):
         return "feedback by ", str(self.author), "(" + str(self.add_time) + ")"
 
 
+class Address(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+        verbose_name="ID кафе"
+    )
+    country = models.CharField(
+        max_length=100,
+        verbose_name="Страна"
+    )
+    city = models.CharField(
+        max_length=100,
+        verbose_name="Город"
+    )
+    street = models.CharField(
+        max_length=100,
+        verbose_name="Улица"
+    )
+    house = models.CharField(
+        max_length=100,
+        verbose_name="Дом"
+    )
+
+    def __str__(self):
+        return self.city + " " + self.street
+
+
 class Cafe(models.Model):
     # ToDo сделать функцию для изменения рейтинга кафе(встроить в функцию добавления отзыва)
     # ToDo добавить картинки для кафе
@@ -156,11 +155,6 @@ class Cafe(models.Model):
         Coordinates,
         on_delete=models.CASCADE,
         verbose_name="Координаты кафе",
-    )
-    cafe_owner = models.ForeignKey(
-        Owner,
-        on_delete=models.CASCADE,
-        verbose_name="Владелец кафе",
     )
     cafe_menu = models.ManyToManyField(
         Item,
@@ -191,6 +185,21 @@ class Cafe(models.Model):
         Feedback,
         verbose_name="Отзывы о кафе",
         blank=True
+    )
+    cafe_address = models.ForeignKey(
+        Address,
+        on_delete=models.CASCADE,
+        verbose_name="Адрес кафе",
+    )
+    phone_regex = RegexValidator(
+        regex=r'^\+?1?\d{9,15}$',
+        message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+    )  # Проверка валидности номера
+    cafe_phone_number = models.CharField(
+        validators=[phone_regex],
+        max_length=17,
+        blank=True,
+        verbose_name="Номер телефона кафе"
     )
 
     def __str__(self):

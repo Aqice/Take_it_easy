@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework.response import Response
-from .models import Cafe, Owner, Item, WaitList
+from .models import Cafe, Item, WaitList
 from .serializers import CafeSerializer
 from users.models import User
 
@@ -130,8 +130,10 @@ def get_cafe_by_coord(request):
                 {
                     "icon": cafe.icon.url,
                     "cafe_name": cafe.cafe_name,
-                    "lat": cafe.cafe_coordinates.lat,
-                    "lon": cafe.cafe_coordinates.lon,
+                    "cafe_coordinates": {
+                        "lat": cafe.cafe_coordinates.lat,
+                        "lon": cafe.cafe_coordinates.lon
+                    },
                     "cafe_description": cafe.cafe_description,
                     "cafe_id": cafe.cafe_id
                 }

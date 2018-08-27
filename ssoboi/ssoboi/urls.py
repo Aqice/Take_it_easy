@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('cafes.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
+    url(r'^users/', include('users.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
