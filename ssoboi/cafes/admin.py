@@ -6,6 +6,7 @@ from .models import Item
 from .models import WaitList
 from .models import Feedback
 from .models import Address
+from .models import Order
 
 
 class CafeListAdmin(admin.ModelAdmin):
@@ -33,3 +34,4 @@ admin.site.register(Coordinates)
 admin.site.register(OpeningHours)
 admin.site.register(Item)
 admin.site.register(Address)
+admin.site.register(Order)

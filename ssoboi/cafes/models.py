@@ -132,6 +132,29 @@ class Address(models.Model):
         return self.city + " " + self.street
 
 
+class Order(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+        verbose_name="ID заказа"
+    )
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Заказчик"
+    )
+    on_time = models.DateTimeField(
+        verbose_name="Время, на которое был сделан заказ"
+    )
+    order_time = models.DateTimeField(
+        verbose_name="Время, когда был сделан заказ",
+        default=django.utils.timezone.now
+    )
+    items = models.ManyToManyField(
+        Item,
+        verbose_name="Товар"
+    )
+
+
 class Cafe(models.Model):
     # ToDo сделать функцию для изменения рейтинга кафе(встроить в функцию добавления отзыва)
     # ToDo добавить картинки для кафе
@@ -200,6 +223,10 @@ class Cafe(models.Model):
         max_length=17,
         blank=True,
         verbose_name="Номер телефона кафе"
+    )
+    cafe_orders = models.ManyToManyField(
+        Order,
+        verbose_name="Заказы кафе"
     )
 
     def __str__(self):
