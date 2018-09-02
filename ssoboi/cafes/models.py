@@ -153,6 +153,17 @@ class Order(models.Model):
         Item,
         verbose_name="Товар"
     )
+    payed = models.BooleanField(
+        default=False,
+        verbose_name="Заказ оплачен"
+    )
+    done = models.BooleanField(
+        default=False,
+        verbose_name="Заказ готов"
+    )
+
+    def __str__(self):
+        return "Заказ № " + str(self.id)
 
 
 class Cafe(models.Model):

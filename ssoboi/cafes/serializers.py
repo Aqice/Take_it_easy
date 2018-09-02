@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Cafe, Coordinates, Item, OpeningHours, Feedback, Address
+from .models import Cafe, Coordinates, Item, OpeningHours, Feedback, Address, Order
+from users.models import User
+from users.serializers import UserSerializer
 
 
 class CoordinatesSerializer(serializers.ModelSerializer):
@@ -56,6 +58,25 @@ class AddressSerializer(serializers.ModelSerializer):
             "street",
             "house",
         )
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = ItemSerializer(many=True)
+    customer = UserSerializer()
+
+    class Meta:
+        model = Order
+        fields = (
+            "id",
+            "customer",
+            "on_time",
+            "order_time",
+            "items",
+            "payed"
+        )
+
+    def create(self, validated_data):
+        print(validated_data)
 
 
 class CafeSerializer(serializers.ModelSerializer):
