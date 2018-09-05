@@ -247,6 +247,7 @@ class Order(models.Model):
     items = models.ForeignKey(
         # ToDo сделать потом ManyToMany или что-то вроде
         Item,
+        on_delete=models.CASCADE,
         verbose_name="Товар"
     )
     done = models.BooleanField(
