@@ -260,6 +260,7 @@ class Order(models.Model):
     )
     cafe_id = models.ForeignKey(
         Cafe,
+        on_delete=models.CASCADE,
         verbose_name="Кафе"
     )
 
