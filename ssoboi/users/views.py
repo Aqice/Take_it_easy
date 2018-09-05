@@ -71,6 +71,5 @@ class UserlLogOut(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def post(self, request):
-        print(request.user)
         logout(request)
         return Response(status=200)

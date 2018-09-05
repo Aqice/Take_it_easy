@@ -178,13 +178,20 @@ def get_item_by_id(request):
 
 class OrdersList(APIView):
     def get(self, request):
-        order_queryset = Order.objects.all()
+        try:
+            cafe_id = request.GET["cafe_id"]
+        except KeyError as e:
+            return Response("No " + e.args[0] + " field", status=400)
+
+        order_queryset = Order.objects.filter(
+            cafe_id=cafe_id,
+            taken=False
+        )
         serializer = OrderSerializer(order_queryset, many=True)
         return JsonResponse(serializer.data, safe=False)
 
 
 class OrderCreation(APIView):
-
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
@@ -192,15 +199,40 @@ class OrderCreation(APIView):
         try:
             customer = User.objects.get(username=request.user)
             on_time = request.POST["on_time"]
-            items = json.loads(request.POST["items"])
+            item_id = request.POST["items"]
+            cafe_id = request.POST["cafe_id"]
         except KeyError as e:
             return Response("No " + e.args[0] + " field", status=400)
         order = Order(
             customer=customer,
-            on_time=on_time
+            on_time=on_time,
+            items=Item.objects.get(item_id=item_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id)
         )
-        for item_id in items:
-            item = Item.objects.get(item_id=item_id)
-            order.items.add(item)
+        order.save()
+        return Response(status=200)
+
+
+class ChangingOrderStatus(APIView):
+    def post(self, request):
+        try:
+            order_id = request.data["order_id"]
+            status_type = request.data["status_type"]
+        except KeyError as e:
+            return Response("No " + e.args[0] + " field", status=400)
+
+        try:
+            order = Order.objects.get(
+                id=order_id
+            )
+        except Exception as e:
+            return Response("No " + e.args[0] + " field", status=400)
+
+        if status_type == "done":
+            order.done = True
+        elif status_type == "taken":
+            order.taken = True
+        else:
+            return Response("Bad status_type", status=400)
         order.save()
         return Response(status=200)

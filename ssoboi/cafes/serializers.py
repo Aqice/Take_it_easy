@@ -61,7 +61,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = ItemSerializer(many=True)
+    items = ItemSerializer()
     customer = UserSerializer()
 
     class Meta:
@@ -72,7 +72,9 @@ class OrderSerializer(serializers.ModelSerializer):
             "on_time",
             "order_time",
             "items",
-            "payed"
+            "done",
+            "taken",
+            "cafe_id"
         )
 
     def create(self, validated_data):
