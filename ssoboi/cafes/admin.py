@@ -3,9 +3,9 @@ from .models import Cafe
 from .models import Coordinates
 from .models import OpeningHours
 from .models import Item
-from .models import WaitList
 from .models import Feedback
 from .models import Address
+from .models import Order
 
 
 class CafeListAdmin(admin.ModelAdmin):
@@ -26,10 +26,10 @@ class FeedbackAdmin(admin.ModelAdmin):
     list_display = ['__str__']
 
 
-admin.site.register(WaitList, WaitListAdmin)
 admin.site.register(Cafe, CafeListAdmin)
 admin.site.register(Feedback, FeedbackAdmin)
 admin.site.register(Coordinates)
 admin.site.register(OpeningHours)
 admin.site.register(Item)
 admin.site.register(Address)
+admin.site.register(Order)

@@ -227,68 +227,40 @@ class Cafe(models.Model):
         return dict_for_return
 
 
-# ToDo Переписать, выглядит крайне погано, подумать, как лучше сделать
-class WaitList(models.Model):
-    order_id = models.AutoField(
-        primary_key=True
+class Order(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+        verbose_name="ID заказа"
     )
-    item_1 = models.ForeignKey(
-        Item, on_delete=models.CASCADE, related_name='item_1', null=True
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Заказчик"
     )
-    amount_1 = models.IntegerField(
-        verbose_name="Количество", default=1
+    on_time = models.DateTimeField(
+        verbose_name="Время, на которое был сделан заказ"
     )
-
-    item_2 = models.ForeignKey(
-        Item, verbose_name="Продукт 2", on_delete=models.CASCADE, blank=True, related_name='item_2', null=True
+    order_time = models.DateTimeField(
+        verbose_name="Время, когда был сделан заказ",
+        default=django.utils.timezone.now
     )
-    amount_2 = models.IntegerField(
-        verbose_name="Количество", blank=True, null=True
-    )
-
-    item_3 = models.ForeignKey(
-        Item, verbose_name="Продукт 3", on_delete=models.CASCADE, blank=True, related_name='item_3', null=True
-    )
-    amount_3 = models.IntegerField(
-        verbose_name="Количество", blank=True, null=True
-    )
-
-    item_4 = models.ForeignKey(
-        Item, verbose_name="Продукт 4", on_delete=models.CASCADE, blank=True, related_name='item_4', null=True
-    )
-    amount_4 = models.IntegerField(
-        verbose_name="Количество", blank=True, null=True
-    )
-
-    item_5 = models.ForeignKey(
-        Item, verbose_name="Продукт 5", on_delete=models.CASCADE, blank=True, related_name='item_5', null=True
-    )
-    amount_5 = models.IntegerField(
-        verbose_name="Количество", blank=True, null=True
-    )
-
-    item_6 = models.ForeignKey(
-        Item, verbose_name="Продукт 6", on_delete=models.CASCADE, blank=True, related_name='item_6', null=True
-    )
-    amount_6 = models.IntegerField(
-        verbose_name="Количество", blank=True, null=True
-    )
-    client = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Клиент",
-    )
-    cafe_id = models.ForeignKey(
-        Cafe, verbose_name="Кафе", on_delete=models.CASCADE
-    )
-
-    time_to_take = models.TimeField(
-        verbose_name="Заказ будет готов к "
-    )
-    paid = models.BooleanField(
-        verbose_name="Оплачено"
+    items = models.ForeignKey(
+        # ToDo сделать потом ManyToMany или что-то вроде
+        Item,
+        verbose_name="Товар"
     )
     done = models.BooleanField(
-        verbose_name="Готовность заказа"
+        default=False,
+        verbose_name="Заказ готов"
+    )
+    taken = models.BooleanField(
+        default=False,
+        verbose_name="Заказ забрали"
+    )
+    cafe_id = models.ForeignKey(
+        Cafe,
+        verbose_name="Кафе"
     )
 
     def __str__(self):
-        return 'Заказ №' + str(self.order_id) + " (Готов к " + str(self.time_to_take)[:-3] + ")"
+        return "Заказ № " + str(self.id)

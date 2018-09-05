@@ -1,17 +1,24 @@
 import json
-from json import JSONDecodeError
 
+from rest_framework import permissions
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from django.http import Http404
 from rest_framework.response import Response
-from .models import Cafe, Item, WaitList
-from .serializers import CafeSerializer
+from .models import Cafe, Item, Order
+from .serializers import CafeSerializer, OrderSerializer
 from users.models import User
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return None
 
 
 class CafeList(APIView):
@@ -67,11 +74,11 @@ class CafeDetail(APIView):
 
            """
         try:
-            snippet = self.get_object(pk)
+            cafe = self.get_object(pk)
         except Http404:
             return HttpResponse(status=404)
 
-        serializer = CafeSerializer(snippet)
+        serializer = CafeSerializer(cafe)
         return JsonResponse(serializer.data)
 
 
@@ -169,212 +176,63 @@ def get_item_by_id(request):
     return HttpResponse(serialized_obj)
 
 
-@csrf_exempt
-def create_new_wait_list(request):
-    """
+class OrdersList(APIView):
+    def get(self, request):
+        try:
+            cafe_id = request.GET["cafe_id"]
+        except KeyError as e:
+            return Response("No " + e.args[0] + " field", status=400)
 
-        Функция для создания нового списка ожидания для кафе
-
-        Параметры:
-            - блюда (`items`) массив в json
-            - количества каждого блюда (`amounts`) массив в json
-            - id клиента (`User_id`)
-            - id кафе (`cafe_id`)
-            - время, к которому необходимо приготовить заказ (`time_to_take`) в формате xx.yy.zz
-
-        return: номер заказа (`order_id`), если все прошло штатно
-    """
-    if request.method != "POST":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-
-    try:
-        items = json.loads(request.POST["items"])
-    except KeyError:
-        return HttpResponseBadRequest("No items in request")
-    except JSONDecodeError:
-        return HttpResponseBadRequest("Invalid JSON format in items")
-    if len(items) > 6:
-        return HttpResponseBadRequest("Too many items. Maximum is 6")
-    if len(items) < 1:
-        return HttpResponseBadRequest("No items.")
-
-    try:
-        amounts = json.loads(request.POST["amounts"])
-    except KeyError:
-        return HttpResponseBadRequest("No amount in request")
-    except JSONDecodeError:
-        return HttpResponseBadRequest("Invalid JSON format in amount")
-    if len(items) != len(amounts):
-        return HttpResponseBadRequest("Length of amounts and items are not the same")
-
-    try:
-        User_id = request.POST["User_id"]
-    except KeyError:
-        return HttpResponseBadRequest("No User_id in request")
-    except ObjectDoesNotExist:
-        return HttpResponseBadRequest("No object with your id")
-
-    try:
-        cafe_id = request.POST["cafe_id"]
-        # как поведет себя этот метод, если для кафе с таким cafe_id уже существует waitlist?
-    except KeyError:
-        return HttpResponseBadRequest("No id in request")
-    except ObjectDoesNotExist:
-        return HttpResponseBadRequest("No object with your id")
-
-    try:
-        time_to_take = request.POST["time_to_take"]
-    except KeyError:
-        return HttpResponseBadRequest("Bad time format")
-
-    if len(items) == 1:
-        wait_list = WaitList(
-            item_1=Item.objects.get(item_id=items[0]),
-            amount_1=amounts[0],
-            User=User.objects.get(User_id=User_id),
-            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
-            time_to_take=time_to_take,
-            paid=False,
-            done=False
+        order_queryset = Order.objects.filter(
+            cafe_id=cafe_id,
+            taken=False
         )
-    elif len(items) == 2:
-        wait_list = WaitList(
-            item_1=Item.objects.get(item_id=items[0]),
-            amount_1=amounts[0],
-            item_2=Item.objects.get(item_id=items[1]),
-            amount_2=amounts[1],
-            User=User.objects.get(User_id=User_id),
-            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
-            time_to_take=time_to_take,
-            paid=False,
-            done=False
+        serializer = OrderSerializer(order_queryset, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+class OrderCreation(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+
+    def post(self, request):
+        try:
+            customer = User.objects.get(username=request.user)
+            on_time = request.POST["on_time"]
+            item_id = request.POST["items"]
+            cafe_id = request.POST["cafe_id"]
+        except KeyError as e:
+            return Response("No " + e.args[0] + " field", status=400)
+        order = Order(
+            customer=customer,
+            on_time=on_time,
+            items=Item.objects.get(item_id=item_id),
+            cafe_id=Cafe.objects.get(cafe_id=cafe_id)
         )
-    elif len(items) == 3:
-        wait_list = WaitList(
-            item_1=Item.objects.get(item_id=items[0]),
-            amount_1=amounts[0],
-            item_2=Item.objects.get(item_id=items[1]),
-            amount_2=amounts[1],
-            item_3=Item.objects.get(item_id=items[2]),
-            amount_3=amounts[2],
-            User=User.objects.get(User_id=User_id),
-            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
-            time_to_take=time_to_take,
-            paid=False,
-            done=False
-        )
-    elif len(items) == 4:
-        wait_list = WaitList(
-            item_1=Item.objects.get(item_id=items[0]),
-            amount_1=amounts[0],
-            item_2=Item.objects.get(item_id=items[1]),
-            amount_2=amounts[1],
-            item_3=Item.objects.get(item_id=items[2]),
-            amount_3=amounts[2],
-            item_4=Item.objects.get(item_id=items[3]),
-            amount_4=amounts[3],
-            User=User.objects.get(User_id=User_id),
-            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
-            time_to_take=time_to_take,
-            paid=False,
-            done=False
-        )
-    elif len(items) == 5:
-        wait_list = WaitList(
-            item_1=Item.objects.get(item_id=items[0]),
-            amount_1=amounts[0],
-            item_2=Item.objects.get(item_id=items[1]),
-            amount_2=amounts[1],
-            item_3=Item.objects.get(item_id=items[2]),
-            amount_3=amounts[2],
-            item_4=Item.objects.get(item_id=items[3]),
-            amount_4=amounts[3],
-            item_5=Item.objects.get(item_id=items[4]),
-            amount_5=amounts[4],
-            User=User.objects.get(User_id=User_id),
-            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
-            time_to_take=time_to_take,
-            paid=False,
-            done=False
-        )
-    elif len(items) == 6:
-        wait_list = WaitList(
-            item_1=Item.objects.get(item_id=items[0]),
-            amount_1=amounts[0],
-            item_2=Item.objects.get(item_id=items[1]),
-            amount_2=amounts[1],
-            item_3=Item.objects.get(item_id=items[2]),
-            amount_3=amounts[2],
-            item_4=Item.objects.get(item_id=items[3]),
-            amount_4=amounts[3],
-            item_5=Item.objects.get(item_id=items[4]),
-            amount_5=amounts[4],
-            item_6=Item.objects.get(item_id=items[5]),
-            amount_6=amounts[5],
-            User=User.objects.get(User_id=User_id),
-            cafe_id=Cafe.objects.get(cafe_id=cafe_id),
-            time_to_take=time_to_take,
-            paid=False,
-            done=False
-        )
-
-    wait_list.save()
-
-    return HttpResponse(wait_list.order_id)
+        order.save()
+        return Response(status=200)
 
 
-@csrf_exempt
-def get_all_wait_lists_by_cafe_id(request):
-    """
+class ChangingOrderStatus(APIView):
+    def post(self, request):
+        try:
+            order_id = request.data["order_id"]
+            status_type = request.data["status_type"]
+        except KeyError as e:
+            return Response("No " + e.args[0] + " field", status=400)
 
-        Функция для получения списка заказов по `cafe_id`
+        try:
+            order = Order.objects.get(
+                id=order_id
+            )
+        except Exception as e:
+            return Response("No " + e.args[0] + " field", status=400)
 
-        Параметры:
-            - `cafe_id`: ID кафе, список заказов которого нужно получить
-
-        return: список из заказов (`WaitList`), если все прошло штатно
-    """
-    if request.method != "GET":
-        return HttpResponseBadRequest("Incorrect type of request. GET needed.")
-    try:
-        wait_list = WaitList.objects.get(
-            cafe_id=request.GET["cafe_id"],
-            done=False
-        )
-    except KeyError:
-        return HttpResponseBadRequest("No id in request")
-    except ObjectDoesNotExist:
-        return HttpResponseBadRequest("No object with your id")
-    serialized_obj = serializers.serialize('json', [wait_list, ])
-
-    return HttpResponse(serialized_obj)
-
-
-@csrf_exempt
-def change_wait_list_paid_status(request):
-    """
-
-        Функция для изменения статуса done у объекта WaitList по `wait_list_id`
-
-        Параметры:
-            - `wait_list_id`: ID WaitList, статус которого нужно изменить
-
-        return: Новый статус объекта WaitList, если всё прошло штатно
-    """
-    if request.method != "POST":
-        return HttpResponseBadRequest("Incorrect type of request. POST needed.")
-
-    try:
-        wait_list = WaitList.objects.get(
-            order_id=request.POST["wait_list_id"]
-        )
-    except KeyError:
-        return HttpResponseBadRequest("No wait_list_id in request")
-    except ObjectDoesNotExist:
-        return HttpResponseBadRequest("No WaitList object with this ID")
-    if wait_list.done:
-        return HttpResponseBadRequest("WaitList object done status already is True")
-
-    wait_list.done = True
-    wait_list.save()
-    return HttpResponse(wait_list.done)
+        if status_type == "done":
+            order.done = True
+        elif status_type == "taken":
+            order.taken = True
+        else:
+            return Response("Bad status_type", status=400)
+        order.save()
+        return Response(status=200)
