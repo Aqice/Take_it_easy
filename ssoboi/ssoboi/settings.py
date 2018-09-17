@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'phonenumber_field',
     'cafes',
+    'rest_framework',
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [

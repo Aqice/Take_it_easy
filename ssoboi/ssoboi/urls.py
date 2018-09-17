@@ -17,12 +17,14 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
+from rest_framework_swagger.views import get_swagger_view
 
-
+schema_view = get_swagger_view(title='Documentation')
 urlpatterns = [
     url(r'admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^', include('cafes.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^users/', include('users.urls')),
+    url(r'^docs/', schema_view),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
