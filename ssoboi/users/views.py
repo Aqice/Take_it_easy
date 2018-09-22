@@ -21,13 +21,13 @@ class UserReg(APIView):
     def post(self, request):
         """
         Функция для регистрации нового пользователя
-
+        ---
         Параметры:
-          * username - Имя пользователя. Должно быть уникальным
-          * email - Email пользователя. Должен быть уникальным
-          * first_name - Имя пользователя
-          * last_name - Фамилия пользователя
-
+            * username - Имя пользователя. Должно быть уникальным
+            * email - Email пользователя. Должен быть уникальным
+            * first_name - Имя пользователя
+            * last_name - Фамилия пользователя
+        ---
         Возвращает:
           username, если пользователь был создан, иначе ошибку
         """
@@ -51,6 +51,16 @@ class UserAuth(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def post(self, request):
+        """
+        Функция для входа пользователя
+        ---
+        Параметры:
+            * username
+            * password
+        ---
+        Возвращает:
+            Ошибку со статусом 400 или статус 200, если всё прошло успешно
+        """
         try:
             username = request.POST['username']
             password = request.POST['password']
@@ -71,5 +81,15 @@ class UserlLogOut(APIView):
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def post(self, request):
+        """
+        Функция для выхода пользователя.
+        ---
+            Права:
+                пользователь должен быть аутентифицирован
+        ---
+            Параметров нет
+        ---
+            Статус 200, если всё прошло штатно
+        """
         logout(request)
         return Response(status=200)
