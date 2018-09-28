@@ -167,9 +167,9 @@ class CafeCoordinates(APIView):
             return HttpResponseBadRequest("Incorrect type of request. GET needed.")
 
         try:
-            lat = int(request.GET["lat"])
-            lon = int(request.GET["lon"])
-            r = int(request.GET["r"])
+            lat = float(request.GET["lat"])
+            lon = float(request.GET["lon"])
+            r = float(request.GET["r"])
         except KeyError:
             return HttpResponseBadRequest("lat, lon or r parameter is invalid")
 
